@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/<Amarjeetlocato>/Dhondoo-To-gitops.git
+    repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
     targetRevision: HEAD
     path: applications
 

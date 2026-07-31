@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/<Amarjeetlocato>/DHONDOO-TO---GITOPS.git
+    repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
     targetRevision: main
     path: helm/applications
 
