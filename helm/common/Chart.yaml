@@ -1,0 +1,23 @@
+apiVersion: v2
+
+name: dhondoo-common
+
+description: Dhondoo Enterprise Helm Library
+
+type: library
+
+version: 1.0.0
+
+appVersion: "1.0.0"
+
+keywords:
+  - kubernetes
+  - springboot
+  - microservices
+  - gitops
+  - platform
+
+maintainers:
+  - name: Dhondoo Platform Team
+
+home: https://github.com/Amarjeetlocato/Dhondoo-To---gitops
