@@ -6,7 +6,7 @@ timezone: UTC
 
 image:
 
-  repository: whomaiamar/gateway
+  repository: whomaiamar/user-registry
 
   tag: latest
 
@@ -16,9 +16,9 @@ service:
 
   type: ClusterIP
 
-  port: 8079
+  port: 8080
 
-  targetPort: 8079
+  targetPort: 8080
 
 configMap:
 
@@ -26,9 +26,9 @@ configMap:
 
   data:
 
-    SPRING_APPLICATION_NAME: gateway
+    SPRING_APPLICATION_NAME: user-service
 
-    SERVER_PORT: "8079"
+    SERVER_PORT: "8080"
 
     EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
 

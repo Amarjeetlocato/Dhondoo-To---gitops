@@ -2,143 +2,124 @@
 ==============================================================================
 Dhondoo Enterprise Helm Library
 Common Helper Templates
-==============================================================================
 
-This file contains reusable helper functions that are shared by all Helm
-templates in this chart.
-
-These helpers eliminate duplication and provide consistent naming,
-labels, selectors, and service account generation.
-
+This file contains reusable helper functions shared by all application charts.
+These helpers provide consistent naming, labels, selectors, and ServiceAccount
+generation across the entire platform.
 ==============================================================================
 */}}
 
 {{/*
 ------------------------------------------------------------------------------
 Chart Name
-Returns the chart name or nameOverride if specified.
+
+Returns the chart name or nameOverride if provided.
+
+Example:
+Chart Name   : gateway
+nameOverride : api
+
+Result:
+api
 ------------------------------------------------------------------------------
 */}}
 {{- define "dhondoo.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
 {{/*
 ------------------------------------------------------------------------------
-Fully Qualified Name
-Generates a unique resource name.
+Full Resource Name
+
+Generates a unique Kubernetes resource name.
 
 Example:
-Release Name : gateway
-Chart Name   : service-registry
+
+Release Name : dev
+Chart Name   : gateway
 
 Result:
-gateway-service-registry
+dev-gateway
 ------------------------------------------------------------------------------
 */}}
 {{- define "dhondoo.fullname" -}}
-
-{{- if .Values.fullnameOverride }}
-
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-
-{{- else }}
-
-{{- printf "%s-%s" .Release.Name (include "dhondoo.name" .) | trunc 63 | trimSuffix "-" }}
-
-{{- end }}
-
-{{- end }}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name (include "dhondoo.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
 
 {{/*
 ------------------------------------------------------------------------------
 Chart Label
 
-Example
+Example:
 
 gateway-1.0.0
-
 ------------------------------------------------------------------------------
 */}}
 {{- define "dhondoo.chart" -}}
-
-{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-
-{{- end }}
+{{- printf "%s-%s" .Chart.Name (.Chart.Version | replace "+" "_") | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
 {{/*
 ------------------------------------------------------------------------------
 Common Labels
 
-These labels are added to every Kubernetes resource.
+Applied to every Kubernetes resource.
 
-Recommended Kubernetes labels:
+Reference:
 https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
 ------------------------------------------------------------------------------
 */}}
-
-{{- define "dhondoo.labels" }}
-
+{{- define "dhondoo.labels" -}}
 helm.sh/chart: {{ include "dhondoo.chart" . }}
-
 app.kubernetes.io/name: {{ include "dhondoo.name" . }}
-
 app.kubernetes.io/instance: {{ .Release.Name }}
-
-app.kubernetes.io/version: {{ .Chart.AppVersion }}
-
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-
-{{- end }}
+app.kubernetes.io/part-of: dhondoo
+{{- end -}}
 
 {{/*
 ------------------------------------------------------------------------------
 Selector Labels
 
-Selectors are used by
+These labels are used by:
 
-Deployment
-Service
-HPA
+- Deployment
+- Service
+- HorizontalPodAutoscaler
 
-These MUST NEVER change after deployment.
-
+IMPORTANT:
+Never change selector labels after a resource has been created.
 ------------------------------------------------------------------------------
 */}}
-
-{{- define "dhondoo.selectorLabels" }}
-
+{{- define "dhondoo.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "dhondoo.name" . }}
-
 app.kubernetes.io/instance: {{ .Release.Name }}
-
-{{- end }}
+{{- end -}}
 
 {{/*
 ------------------------------------------------------------------------------
 Service Account Name
 
-If create=true
+If serviceAccount.create=true
 
-Generate ServiceAccount
+Use:
+- serviceAccount.name (if specified)
+- otherwise generated fullname
 
-Else
+If create=false
 
-Use default Kubernetes ServiceAccount
-
+Use Kubernetes default ServiceAccount.
 ------------------------------------------------------------------------------
 */}}
-
-{{- define "dhondoo.serviceAccountName" }}
-
-{{- if .Values.serviceAccount.create }}
-
-{{- default (include "dhondoo.fullname" .) .Values.serviceAccount.name }}
-
-{{- else }}
-
+{{- define "dhondoo.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "dhondoo.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
 default
-
-{{- end }}
-
-{{- end }}
+{{- end -}}
+{{- end -}}

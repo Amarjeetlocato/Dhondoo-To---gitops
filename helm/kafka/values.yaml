@@ -6,9 +6,9 @@ timezone: UTC
 
 image:
 
-  repository: whomaiamar/gateway
+  repository: apache/kafka
 
-  tag: latest
+  tag: "3.9.1"
 
   pullPolicy: IfNotPresent
 
@@ -16,9 +16,9 @@ service:
 
   type: ClusterIP
 
-  port: 8079
+  port: 9092
 
-  targetPort: 8079
+  targetPort: 9092
 
 configMap:
 
@@ -26,9 +26,9 @@ configMap:
 
   data:
 
-    SPRING_APPLICATION_NAME: gateway
+    SPRING_APPLICATION_NAME: kafka
 
-    SERVER_PORT: "8079"
+    SERVER_PORT: "9092"
 
     EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
 

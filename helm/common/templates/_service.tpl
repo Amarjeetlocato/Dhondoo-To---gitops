@@ -1,3 +1,5 @@
+{{- define "dhondoo.service" -}}
+
 apiVersion: v1
 kind: Service
 
@@ -8,14 +10,12 @@ metadata:
     {{- include "dhondoo.labels" . | nindent 4 }}
 
 spec:
-
   type: {{ .Values.service.type }}
 
   selector:
     {{- include "dhondoo.selectorLabels" . | nindent 4 }}
 
   ports:
-
     - name: http
 
       protocol: TCP
@@ -23,3 +23,5 @@ spec:
       port: {{ .Values.service.port }}
 
       targetPort: {{ .Values.service.targetPort }}
+
+{{- end -}}

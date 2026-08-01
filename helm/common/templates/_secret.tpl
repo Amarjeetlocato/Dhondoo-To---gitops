@@ -1,3 +1,5 @@
+{{- define "dhondoo.secret" -}}
+
 {{- if .Values.secret.enabled }}
 
 apiVersion: v1
@@ -12,11 +14,10 @@ metadata:
 type: Opaque
 
 stringData:
-
 {{- range $key, $value := .Values.secret.data }}
-
   {{ $key }}: {{ $value | quote }}
-
 {{- end }}
 
 {{- end }}
+
+{{- end -}}

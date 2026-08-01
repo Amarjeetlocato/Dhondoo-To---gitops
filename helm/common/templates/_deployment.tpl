@@ -1,5 +1,8 @@
+{{- define "dhondoo.deployment" -}}
+
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: {{ include "dhondoo.fullname" . }}
   labels:
@@ -40,8 +43,7 @@ spec:
       {{- end }}
 
       containers:
-
-        - name: {{ .Chart.Name }}
+        - name: {{ include "dhondoo.name" . }}
 
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 
@@ -53,22 +55,22 @@ spec:
               protocol: TCP
 
           env:
-
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile | quote }}
 
             - name: TZ
               value: {{ .Values.timezone | quote }}
 
-          {{- if .Values.configMap.enabled }}
+          {{- if or .Values.configMap.enabled .Values.secret.enabled }}
           envFrom:
+          {{- if .Values.configMap.enabled }}
             - configMapRef:
                 name: {{ include "dhondoo.fullname" . }}
           {{- end }}
-
           {{- if .Values.secret.enabled }}
             - secretRef:
                 name: {{ include "dhondoo.fullname" . }}
+          {{- end }}
           {{- end }}
 
           resources:
@@ -96,13 +98,9 @@ spec:
             periodSeconds: {{ .Values.probes.startup.periodSeconds }}
 
           securityContext:
-
             runAsNonRoot: true
-
             allowPrivilegeEscalation: false
-
             readOnlyRootFilesystem: false
-
             capabilities:
               drop:
                 - ALL
@@ -121,3 +119,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+{{- end -}}
