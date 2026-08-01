@@ -1,0 +1,11 @@
+# Helm dependency packages
+**/charts/
+
+# Helm lock files (optional)
+# **/Chart.lock
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
