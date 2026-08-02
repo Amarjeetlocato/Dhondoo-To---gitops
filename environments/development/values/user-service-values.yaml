@@ -1,0 +1,48 @@
+image:
+  repository: whoami007/user-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8081
+
+containerPort: 8081
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+env:
+  SPRING_PROFILES_ACTIVE: kubernetes
+
+  SERVER_PORT: "8081"
+
+  DB_HOST: mysql.database.svc.cluster.local
+  DB_PORT: "3306"
+  DB_NAME: user_registry
+
+  DB_USERNAME: root
+  DB_PASSWORD: password
+
+  JWT_SECRET: your-secret
+
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry.platform.svc.cluster.local:8761/eureka
+
+  KAFKA_BOOTSTRAP_SERVERS: dhondoo-kafka-kafka-bootstrap.messaging.svc.cluster.local:9092
+
+serviceAccount:
+  create: false
+
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false

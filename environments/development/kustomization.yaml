@@ -1,3 +1,9 @@
 resources:
-  - applications/service-registry.yaml
-  - applications/mysql.yaml
+
+- applications/mysql.yaml
+
+- applications/service-registry.yaml
+
+- applications/kafka.yaml
+
+- applications/user-service.yaml
