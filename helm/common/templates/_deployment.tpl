@@ -10,7 +10,6 @@ metadata:
 
 spec:
   replicas: {{ .Values.replicaCount }}
-
   revisionHistoryLimit: 10
 
   strategy:
@@ -27,7 +26,6 @@ spec:
     metadata:
       labels:
         {{- include "dhondoo.selectorLabels" . | nindent 8 }}
-
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -70,19 +68,24 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
 
-                   env:
+          env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile | quote }}
 
             - name: TZ
               value: {{ .Values.timezone | quote }}
 
+          {{- if or .Values.configMap.existingName .Values.secret.existingName }}
           envFrom:
+          {{- if .Values.configMap.existingName }}
             - configMapRef:
-                name: user-service-config
-
+                name: {{ .Values.configMap.existingName }}
+          {{- end }}
+          {{- if .Values.secret.existingName }}
             - secretRef:
-                name: user-service-secret
+                name: {{ .Values.secret.existingName }}
+          {{- end }}
+          {{- end }}
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
