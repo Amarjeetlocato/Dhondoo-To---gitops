@@ -5,6 +5,7 @@ metadata:
   namespace: messaging
   labels:
     strimzi.io/cluster: dhondoo-kafka
+
 spec:
   replicas: 3
 
@@ -14,13 +15,9 @@ spec:
 
   storage:
     type: persistent-claim
-
-    volumes:
-      - id: 0
-        type: persistent-claim
-        size: 20Gi
-        deleteClaim: false
-        kraftMetadata: shared
+    size: 20Gi
+    storageClass: standard
+    deleteClaim: false
 
   resources:
     requests:
