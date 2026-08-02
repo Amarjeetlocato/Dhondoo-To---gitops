@@ -77,16 +77,23 @@ spec:
             - name: TZ
               value: {{ .Values.timezone | quote }}
 
-          envFrom:
-  - configMapRef:
-      name: {{ include "dhondoo.name" . }}-config
+                    env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springProfile | quote }}
 
-  - secretRef:
-      name: {{ include "dhondoo.name" . }}-secret
+            - name: TZ
+              value: {{ .Values.timezone | quote }}
+
+          envFrom:
+            - configMapRef:
+                name: {{ include "dhondoo.name" . }}-config
+
+            - secretRef:
+                name: {{ include "dhondoo.name" . }}-secret
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-
+            
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}
