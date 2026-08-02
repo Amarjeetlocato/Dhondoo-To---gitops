@@ -77,17 +77,12 @@ spec:
             - name: TZ
               value: {{ .Values.timezone | quote }}
 
-          {{- if or .Values.configMap.enabled .Values.secret.enabled }}
           envFrom:
-          {{- if .Values.configMap.enabled }}
-            - configMapRef:
-                name: {{ include "dhondoo.fullname" . }}
-          {{- end }}
-          {{- if .Values.secret.enabled }}
-            - secretRef:
-                name: {{ include "dhondoo.fullname" . }}
-          {{- end }}
-          {{- end }}
+  - configMapRef:
+      name: {{ include "dhondoo.name" . }}-config
+
+  - secretRef:
+      name: {{ include "dhondoo.name" . }}-secret
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
