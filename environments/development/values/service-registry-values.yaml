@@ -1,0 +1,38 @@
+replicaCount: 1
+
+springProfile: kubernetes
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/service-registry
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8761
+  targetPort: 8761
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: eureka
+    SERVER_PORT: "8761"
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+    EUREKA_CLIENT_FETCH_REGISTRY: "false"
+
+secret:
+  enabled: false
+
+serviceAccount:
+  create: true
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+ingress:
+  enabled: false

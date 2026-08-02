@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: service-registry
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
+    targetRevision: main
+    path: helm/service-registry
+
+    helm:
+      valueFiles:
+        - ../../environments/development/values/service-registry-values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+    syncOptions:
+      - CreateNamespace=true

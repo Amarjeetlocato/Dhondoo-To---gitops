@@ -1,0 +1,7 @@
+resources:
+  - platform.yaml
+  - applications.yaml
+  - database.yaml
+  - messaging.yaml
+  - monitoring.yaml
+  - security.yaml
