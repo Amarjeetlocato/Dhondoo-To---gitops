@@ -70,14 +70,7 @@ spec:
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
 
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: {{ .Values.springProfile | quote }}
-
-            - name: TZ
-              value: {{ .Values.timezone | quote }}
-
-                    env:
+                   env:
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile | quote }}
 
@@ -86,14 +79,14 @@ spec:
 
           envFrom:
             - configMapRef:
-                name: {{ include "dhondoo.name" . }}-config
+                name: user-service-config
 
             - secretRef:
-                name: {{ include "dhondoo.name" . }}-secret
+                name: user-service-secret
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-            
+
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}
