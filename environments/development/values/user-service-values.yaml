@@ -1,6 +1,6 @@
 image:
   image:
-  repository: whoami007/deployment-user-registry
+  repository: whomaiamar/deployment-user-registry
   tag: latest
   pullPolicy: Always
 
