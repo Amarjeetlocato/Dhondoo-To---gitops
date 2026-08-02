@@ -14,11 +14,11 @@ service:
   targetPort: 8080
 
 configMap:
-  enabled: false
+  existingName: user-service-config
 
 secret:
-  enabled: false
-
+  existingName: user-service-secret
+  
 serviceAccount:
   create: true
 
