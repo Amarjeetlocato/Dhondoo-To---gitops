@@ -1,5 +1,6 @@
 image:
-  repository: whoami007/user-service
+  image:
+  repository: whoami007/deployment-user-registry
   tag: latest
   pullPolicy: Always
 
