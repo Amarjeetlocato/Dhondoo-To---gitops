@@ -1,0 +1,42 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: dhondoo-services
+  namespace: messaging
+  labels:
+    strimzi.io/cluster: dhondoo-kafka
+
+spec:
+
+  authentication:
+    type: scram-sha-512
+
+  authorization:
+    type: simple
+
+    acls:
+
+      - resource:
+          type: topic
+          name: "*"
+          patternType: literal
+
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: group
+          name: "*"
+          patternType: literal
+
+        operations:
+          - Read
+
+      - resource:
+          type: cluster
+
+        operations:
+          - Describe
