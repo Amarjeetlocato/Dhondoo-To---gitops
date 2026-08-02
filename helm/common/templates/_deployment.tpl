@@ -96,14 +96,15 @@ spec:
               port: {{ .Values.service.targetPort }}
             failureThreshold: {{ .Values.probes.startup.failureThreshold }}
             periodSeconds: {{ .Values.probes.startup.periodSeconds }}
-
-          securityContext:
-            runAsNonRoot: true
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            capabilities:
-              drop:
-                - ALL
+securityContext:
+  runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
+  runAsUser: {{ .Values.securityContext.runAsUser }}
+  runAsGroup: {{ .Values.securityContext.runAsGroup }}
+  allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+  readOnlyRootFilesystem: {{ .Values.securityContext.readOnlyRootFilesystem }}
+  capabilities:
+    drop:
+      - ALL
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
