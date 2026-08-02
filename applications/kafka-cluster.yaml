@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: <YOUR_GIT_REPOSITORY_URL>
+    repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
     targetRevision: main
     path: infrastructure/kafka
 
