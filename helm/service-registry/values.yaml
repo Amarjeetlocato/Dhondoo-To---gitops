@@ -104,3 +104,12 @@ probes:
     failureThreshold: 30
 
     periodSeconds: 10
+
+
+    securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
