@@ -9,7 +9,7 @@ image:
   repository: whomaiamar/service-registry
 
 
-  tag: "1.0.0"
+  tag: "1.0.1"
 
   pullPolicy: IfNotPresent
 
