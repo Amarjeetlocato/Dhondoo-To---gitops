@@ -35,6 +35,11 @@ spec:
 
     spec:
 
+      {{- with .Values.securityContext }}
+      securityContext:
+        fsGroup: {{ .fsGroup }}
+      {{- end }}
+
       serviceAccountName: {{ include "dhondoo.serviceAccountName" . }}
 
       {{- with .Values.imagePullSecrets }}
@@ -46,8 +51,19 @@ spec:
         - name: {{ include "dhondoo.name" . }}
 
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          {{- with .Values.securityContext }}
+          securityContext:
+            runAsUser: {{ .runAsUser }}
+            runAsGroup: {{ .runAsGroup }}
+            runAsNonRoot: {{ .runAsNonRoot }}
+            allowPrivilegeEscalation: {{ .allowPrivilegeEscalation }}
+            readOnlyRootFilesystem: {{ .readOnlyRootFilesystem }}
+            capabilities:
+              drop:
+                - ALL
+          {{- end }}
 
           ports:
             - name: http
@@ -89,22 +105,13 @@ spec:
               port: {{ .Values.service.targetPort }}
             initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+
           startupProbe:
             httpGet:
               path: {{ .Values.probes.startup.path }}
               port: {{ .Values.service.targetPort }}
             failureThreshold: {{ .Values.probes.startup.failureThreshold }}
             periodSeconds: {{ .Values.probes.startup.periodSeconds }}
-
-          securityContext:
-            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
-            runAsUser: {{ .Values.securityContext.runAsUser }}
-            runAsGroup: {{ .Values.securityContext.runAsGroup }}
-            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
-            readOnlyRootFilesystem: {{ .Values.securityContext.readOnlyRootFilesystem }}
-            capabilities:
-              drop:
-                - ALL
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -120,3 +127,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+{{- end -}}

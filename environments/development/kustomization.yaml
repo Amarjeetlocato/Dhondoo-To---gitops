@@ -1,1 +1,3 @@
-resources: []
+resources:
+  - applications/service-registry.yaml
+  - applications/mysql.yaml

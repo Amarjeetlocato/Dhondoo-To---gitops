@@ -1,0 +1,52 @@
+replicaCount: 1
+
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3306
+  targetPort: 3306
+
+configMap:
+  enabled: false
+
+secret:
+  enabled: true
+  data:
+    MYSQL_DATABASE: dhondoo
+    MYSQL_USER: dhondoo
+    MYSQL_PASSWORD: password123
+    MYSQL_ROOT_PASSWORD: root123
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+serviceAccount:
+  create: true
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: mysql
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: mysql
+
+  template:
+    metadata:
+      labels:
+        app: mysql
+
+    spec:
+
+      securityContext:
+        fsGroup: 999
+
+      containers:
+
+        - name: mysql
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          securityContext:
+            runAsUser: 999
+            runAsGroup: 999
+
+          ports:
+            - containerPort: 3306
+
+          envFrom:
+            - secretRef:
+                name: mysql-secret
+
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+
+          startupProbe:
+            tcpSocket:
+              port: 3306
+            periodSeconds: 10
+            failureThreshold: 30
+
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc

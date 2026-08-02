@@ -5,11 +5,8 @@ springProfile: kubernetes
 timezone: UTC
 
 image:
-
   repository: ""
-
   tag: latest
-
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -17,40 +14,43 @@ imagePullSecrets: []
 podAnnotations: {}
 
 service:
-
   type: ClusterIP
-
   port: 8080
-
   targetPort: 8080
 
-resources:
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
 
+configMap:
+  enabled: false
+  data: {}
+
+secret:
+  enabled: false
+  data: {}
+
+resources:
   requests:
     cpu: 250m
     memory: 512Mi
-
   limits:
     cpu: "1"
     memory: 1Gi
 
-configMap:
-  enabled: false
-
-secret:
-  enabled: false
-
-nodeSelector: {}
-
-affinity: {}
-
-tolerations: []
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
 
 probes:
-
-  liveness:
-    path: /actuator/health/liveness
-    initialDelaySeconds: 60
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
     periodSeconds: 10
 
   readiness:
@@ -58,173 +58,26 @@ probes:
     initialDelaySeconds: 30
     periodSeconds: 5
 
-  startup:
-    path: /actuator/health
-    failureThreshold: 30
-    periodSeconds: 10
-
-configMap:
-
-  enabled: false
-
-  data: {}
-
-secret:
-
-  enabled: false
-
-  data: {}
-
-serviceAccount:
-
-  create: true
-
-  name: ""
-
-  annotations: {}
-
-ingress:
-
-  enabled: false
-
-  className: nginx
-
-  annotations: {}
-
-  hosts: []
-
-  tls: []
-
-autoscaling:
-
-  enabled: false
-
-  minReplicas: 2
-
-  maxReplicas: 10
-
-  targetCPUUtilizationPercentage: 70
-
-pdb:
-
-  enabled: false
-
-  minAvailable: 1
-
-  nameOverride: ""
-
-fullnameOverride: ""
-
-replicaCount: 2
-
-springProfile: kubernetes
-
-timezone: UTC
-
-image:
-
-  repository: ""
-
-  tag: latest
-
-  pullPolicy: IfNotPresent
-
-imagePullSecrets: []
-
-service:
-
-  type: ClusterIP
-
-  port: 8080
-
-  targetPort: 8080
-
-serviceAccount:
-
-  create: true
-
-  name: ""
-
-  annotations: {}
-
-configMap:
-
-  enabled: false
-
-  data: {}
-
-secret:
-
-  enabled: false
-
-  data: {}
-
-resources:
-
-  requests:
-
-    cpu: 250m
-
-    memory: 512Mi
-
-  limits:
-
-    cpu: "1"
-
-    memory: 1Gi
-
-probes:
-
-  startup:
-
-    path: /actuator/health
-
-    failureThreshold: 30
-
-    periodSeconds: 10
-
-  readiness:
-
-    path: /actuator/health/readiness
-
-    initialDelaySeconds: 30
-
-    periodSeconds: 5
-
   liveness:
-
     path: /actuator/health/liveness
-
     initialDelaySeconds: 60
-
     periodSeconds: 10
 
 autoscaling:
-
   enabled: false
-
   minReplicas: 2
-
   maxReplicas: 10
-
   targetCPUUtilizationPercentage: 70
 
 ingress:
-
   enabled: false
-
   className: nginx
-
   annotations: {}
-
   hosts: []
-
   tls: []
 
 pdb:
-
   enabled: false
-
   minAvailable: 1
 
 nodeSelector: {}
@@ -232,22 +85,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-podAnnotations: {}
-
-
-spec:
-  securityContext:
-    runAsUser: 999
-    runAsGroup: 999
-    fsGroup: 999
-
-  containers:
-    - name: service-registry
-      securityContext:
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: false
-        capabilities:
-          drop:
-            - ALL
