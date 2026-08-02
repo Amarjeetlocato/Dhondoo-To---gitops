@@ -1,105 +1,34 @@
 replicaCount: 1
 
-springProfile: kubernetes
-
-timezone: UTC
-
 image:
-
   repository: mysql
-
   tag: "8.0"
-
   pullPolicy: IfNotPresent
 
 service:
-
   type: ClusterIP
-
   port: 3306
 
-  targetPort: 3306
+mysql:
+  rootPassword: root123
+  database: dhondoo
+  username: dhondoo
+  password: dhondoo123
 
-configMap:
-
+persistence:
   enabled: true
-
-  data:
-
-    SPRING_APPLICATION_NAME: mysql
-
-    SERVER_PORT: "3306"
-
-    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
-
-    EUREKA_CLIENT_FETCH_REGISTRY: "false"
-
-secret:
-
-  enabled: false
-
-serviceAccount:
-
-  create: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
 
 resources:
-
   requests:
-
     cpu: 250m
-
     memory: 512Mi
-
   limits:
-
     cpu: "1"
-
     memory: 1Gi
 
-autoscaling:
-
-  enabled: false
-
-pdb:
-
-  enabled: false
-
-ingress:
-
-  enabled: false
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-imagePullSecrets: []
-
-podAnnotations: {}
-
-probes:
-
-  liveness:
-
-    path: /actuator/health/liveness
-
-    initialDelaySeconds: 60
-
-    periodSeconds: 10
-
-  readiness:
-
-    path: /actuator/health/readiness
-
-    initialDelaySeconds: 30
-
-    periodSeconds: 5
-
-  startup:
-
-    path: /actuator/health
-
-    failureThreshold: 30
-
-    periodSeconds: 10
+securityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
