@@ -30,8 +30,8 @@ env:
   DB_PORT: "3306"
   DB_NAME: user_registry
 
-  DB_USERNAME: root
-  DB_PASSWORD: password
+  DB_USERNAME: dhondoo
+  DB_PASSWORD: dhondoo123
 
   JWT_SECRET: your-secret
 
