@@ -1,14 +1,16 @@
-name: Kubernetes Manifest Validation
+name: GitOps Validation
 
 on:
-  push:
-    branches:
-      - main
-      - develop
   pull_request:
     branches:
       - main
       - develop
+
+  push:
+    branches:
+      - main
+      - develop
+
   workflow_dispatch:
 
 permissions:
@@ -16,7 +18,7 @@ permissions:
 
 jobs:
   validate:
-    name: Validate Rendered Manifests
+    name: Validate GitOps Repository
     runs-on: ubuntu-latest
 
     strategy:
@@ -40,27 +42,63 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
       - name: Install kubeconform
         run: |
           curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz -o kubeconform.tar.gz
           tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
 
-      - name: Build Dependencies
+      - name: Build Helm Dependencies
         run: |
           helm dependency build helm/${{ matrix.chart }} || true
 
-      - name: Render Helm Chart
+      - name: Helm Lint
         run: |
-          mkdir rendered
+          helm lint helm/${{ matrix.chart }}
+
+      - name: Helm Template
+        run: |
+          mkdir -p rendered
           helm template \
             ${{ matrix.chart }} \
             helm/${{ matrix.chart }} \
             > rendered/${{ matrix.chart }}.yaml
 
-      - name: Validate Kubernetes Schema
+      - name: Kubernetes Schema Validation
         run: |
           kubeconform \
             -strict \
             -summary \
             rendered/${{ matrix.chart }}.yaml
+
+      - name: Upload Rendered Manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-${{ matrix.chart }}
+          path: rendered
+
+  kustomize:
+    name: Validate Kustomize
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - development
+          - staging
+          - production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Build Environment
+        run: |
+          kustomize build environments/${{ matrix.environment }}

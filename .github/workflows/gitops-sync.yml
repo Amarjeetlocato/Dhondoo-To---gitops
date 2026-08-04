@@ -1,0 +1,103 @@
+name: GitOps Sync
+
+on:
+  repository_dispatch:
+    types:
+      - backend-image-published
+
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Service Name"
+        required: true
+        type: string
+
+      image:
+        description: "Docker Image"
+        required: true
+        type: string
+
+      tag:
+        description: "Docker Tag"
+        required: true
+        type: string
+
+      environment:
+        description: "Environment"
+        required: true
+        default: development
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+permissions:
+  contents: write
+
+jobs:
+
+  update-image:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout GitOps Repository
+        uses: actions/checkout@v4
+
+      - name: Read Event Payload
+        id: payload
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "SERVICE=${{ inputs.service }}" >> $GITHUB_ENV
+            echo "IMAGE=${{ inputs.image }}" >> $GITHUB_ENV
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
+            echo "ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_ENV
+          else
+            echo "SERVICE=${{ github.event.client_payload.service }}" >> $GITHUB_ENV
+            echo "IMAGE=${{ github.event.client_payload.image }}" >> $GITHUB_ENV
+            echo "TAG=${{ github.event.client_payload.tag }}" >> $GITHUB_ENV
+            echo "ENVIRONMENT=${{ github.event.client_payload.environment }}" >> $GITHUB_ENV
+          fi
+
+      - name: Show Payload
+        run: |
+          echo "Service: $SERVICE"
+          echo "Image: $IMAGE"
+          echo "Tag: $TAG"
+          echo "Environment: $ENVIRONMENT"
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Update Helm Values
+        run: |
+          VALUES_FILE="environments/$ENVIRONMENT/values/$SERVICE-values.yaml"
+
+          if [ ! -f "$VALUES_FILE" ]; then
+            echo "Values file not found: $VALUES_FILE"
+            exit 1
+          fi
+
+          yq -i ".image.repository = \"$IMAGE\"" "$VALUES_FILE"
+          yq -i ".image.tag = \"$TAG\"" "$VALUES_FILE"
+
+      - name: Commit Changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "No changes detected."
+            exit 0
+          fi
+
+          git commit -m "ci: deploy $SERVICE:$TAG"
+
+      - name: Push Changes
+        run: |
+          git push
