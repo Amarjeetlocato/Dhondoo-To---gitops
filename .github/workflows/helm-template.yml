@@ -1,0 +1,66 @@
+name: Helm Template Validation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  helm-template:
+    name: Render Helm Charts
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        chart:
+          - service-registry
+          - user-service
+          - gateway
+          - shop-service
+          - order-service
+          - notification-service
+          - chat-service
+          - superuser-service
+          - mysql
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
+
+      - name: Build Chart Dependencies
+        run: |
+          helm dependency build helm/${{ matrix.chart }} || true
+
+      - name: Render Helm Chart
+        run: |
+          mkdir -p rendered
+          helm template \
+            ${{ matrix.chart }} \
+            helm/${{ matrix.chart }} \
+            --output-dir rendered
+
+      - name: Verify Rendered Files
+        run: |
+          echo "Rendered manifests:"
+          find rendered -type f
+
+      - name: Upload Rendered Manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-${{ matrix.chart }}
+          path: rendered
