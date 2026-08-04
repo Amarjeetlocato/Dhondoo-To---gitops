@@ -1,0 +1,54 @@
+name: Helm Chart Lint
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  helm-lint:
+    name: Lint Helm Charts
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        chart:
+          - service-registry
+          - user-service
+          - gateway
+          - shop-service
+          - order-service
+          - notification-service
+          - chat-service
+          - superuser-service
+          - mysql
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
+
+      - name: Build Chart Dependencies
+        run: |
+          if [ -f "helm/${{ matrix.chart }}/Chart.yaml" ]; then
+            helm dependency build helm/${{ matrix.chart }} || true
+          fi
+
+      - name: Lint Chart
+        run: |
+          echo "Linting ${{ matrix.chart }}"
+          helm lint helm/${{ matrix.chart }}
