@@ -1,0 +1,55 @@
+name: Kustomize Validation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kustomize:
+    name: Validate Kustomize Overlays
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - development
+          - staging
+          - production
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Show Kustomize Version
+        run: kustomize version
+
+      - name: Build Environment
+        run: |
+          echo "Building ${{ matrix.environment }}"
+          kustomize build environments/${{ matrix.environment }} > output.yaml
+
+      - name: Verify Output
+        run: |
+          test -s output.yaml
+          echo "Successfully rendered ${{ matrix.environment }}"
+          wc -l output.yaml
+
+      - name: Upload Rendered Manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: kustomize-${{ matrix.environment }}
+          path: output.yaml
