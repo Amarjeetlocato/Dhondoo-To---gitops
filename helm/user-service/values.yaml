@@ -1,10 +1,7 @@
 replicaCount: 1
 
-springProfile: kubernetes
-timezone: UTC
-
 image:
-  repository: whomaiamar/user-registry
+  repository: whomaiamar/user-service
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -14,11 +11,13 @@ service:
   targetPort: 8080
 
 configMap:
+  commonName: common-config
   existingName: user-service-config
 
 secret:
+  commonName: common-secret
   existingName: user-service-secret
-  
+
 serviceAccount:
   create: true
 
@@ -33,21 +32,11 @@ resources:
 autoscaling:
   enabled: false
 
-pdb:
-  enabled: false
-
 ingress:
   enabled: false
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-imagePullSecrets: []
-
-podAnnotations: {}
+pdb:
+  enabled: false
 
 probes:
   liveness:
@@ -64,3 +53,21 @@ probes:
     path: /actuator/health
     failureThreshold: 30
     periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false

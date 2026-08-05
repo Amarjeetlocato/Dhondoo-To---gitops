@@ -1,8 +1,9 @@
 resources:
-- gateway-config.yaml
-- user-service-config.yaml
-- shop-service-config.yaml
-- order-service-config.yaml
-- chat-service-config.yaml
-- notification-service-config.yaml
-- superuser-service-config.yaml
+  - common-config.yaml
+  - gateway-config.yaml
+  - user-service-config.yaml
+  - shop-service-config.yaml
+  - order-service-config.yaml
+  - chat-service-config.yaml
+  - notification-service-config.yaml
+  - superuser-service-config.yaml

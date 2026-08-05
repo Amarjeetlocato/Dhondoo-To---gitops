@@ -75,16 +75,29 @@ spec:
             - name: TZ
               value: {{ .Values.timezone | quote }}
 
-          {{- if or .Values.configMap.existingName .Values.secret.existingName }}
+          {{- if or .Values.configMap.commonName .Values.configMap.existingName .Values.secret.commonName .Values.secret.existingName }}
           envFrom:
-          {{- if .Values.configMap.existingName }}
+
+            {{- if .Values.configMap.commonName }}
+            - configMapRef:
+                name: {{ .Values.configMap.commonName }}
+            {{- end }}
+
+            {{- if .Values.configMap.existingName }}
             - configMapRef:
                 name: {{ .Values.configMap.existingName }}
-          {{- end }}
-          {{- if .Values.secret.existingName }}
+            {{- end }}
+
+            {{- if .Values.secret.commonName }}
+            - secretRef:
+                name: {{ .Values.secret.commonName }}
+            {{- end }}
+
+            {{- if .Values.secret.existingName }}
             - secretRef:
                 name: {{ .Values.secret.existingName }}
-          {{- end }}
+            {{- end }}
+
           {{- end }}
 
           resources:

@@ -10,7 +10,6 @@ spec:
   project: default
 
   source:
-
     repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
 
     targetRevision: main
@@ -18,24 +17,18 @@ spec:
     path: helm/user-service
 
     helm:
-
       valueFiles:
-
         - ../../environments/development/values/user-service-values.yaml
 
   destination:
-
     server: https://kubernetes.default.svc
-
     namespace: platform
 
   syncPolicy:
 
     automated:
-
       prune: true
       selfHeal: true
 
     syncOptions:
-
       - CreateNamespace=true

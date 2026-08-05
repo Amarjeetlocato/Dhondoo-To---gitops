@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: common-config
+  namespace: platform
+
+data:
+  SPRING_PROFILES_ACTIVE: kubernetes
+
+  KAFKA_SERVERS: dhondoo-kafka-kafka-bootstrap.messaging.svc.cluster.local:9092
+
+  EUREKA_SERVER: http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/
+
+  SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+  LOG_LEVEL: INFO
+
+  TZ: UTC

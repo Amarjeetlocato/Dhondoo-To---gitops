@@ -1,11 +1,3 @@
-{{ include "dhondoo.configmap" . }}
-
----
-
-{{ include "dhondoo.secret" . }}
-
----
-
 {{ include "dhondoo.serviceaccount" . }}
 
 ---
