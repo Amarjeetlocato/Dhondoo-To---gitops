@@ -1,72 +1,58 @@
 replicaCount: 1
 
-springProfile: kubernetes
-
-timezone: UTC
-
 image:
-
-  repository: mysql
-
-  tag: "8.0"
-
+  repository: whomaiamar/notification-service
+  tag: latest
   pullPolicy: IfNotPresent
 
 service:
-
   type: ClusterIP
-
-  port: 3306
-
-  targetPort: 3306
+  port: 8087
+  targetPort: 8087
 
 configMap:
-
-  enabled: true
-
-  data:
-
-    SPRING_APPLICATION_NAME: mysql
-
-    SERVER_PORT: "3306"
-
-    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
-
-    EUREKA_CLIENT_FETCH_REGISTRY: "false"
+  commonName: common-config
+  existingName: notification-service-config
 
 secret:
-
-  enabled: false
+  commonName: common-secret
+  existingName: notification-service-secret
 
 serviceAccount:
-
   create: true
 
 resources:
-
   requests:
-
     cpu: 250m
-
     memory: 512Mi
-
   limits:
-
     cpu: "1"
-
     memory: 1Gi
 
 autoscaling:
-
-  enabled: false
-
-pdb:
-
   enabled: false
 
 ingress:
-
   enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
 
 nodeSelector: {}
 
@@ -78,28 +64,10 @@ imagePullSecrets: []
 
 podAnnotations: {}
 
-probes:
-
-  liveness:
-
-    path: /actuator/health/liveness
-
-    initialDelaySeconds: 60
-
-    periodSeconds: 10
-
-  readiness:
-
-    path: /actuator/health/readiness
-
-    initialDelaySeconds: 30
-
-    periodSeconds: 5
-
-  startup:
-
-    path: /actuator/health
-
-    failureThreshold: 30
-
-    periodSeconds: 10
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false

@@ -1,0 +1,6 @@
+image:
+  repository: whomaiamar/superuser-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
