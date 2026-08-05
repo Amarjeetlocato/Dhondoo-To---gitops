@@ -1,0 +1,6 @@
+image:
+  repository: whomaiamar/shop-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
