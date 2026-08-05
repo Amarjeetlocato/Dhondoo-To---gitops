@@ -1,3 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+
 resources:
 
 - applications/mysql.yaml
@@ -7,3 +11,7 @@ resources:
 - applications/kafka.yaml
 
 - applications/user-service.yaml
+
+- applications/shop-service.yaml
+
+- applications/order-service.yaml

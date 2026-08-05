@@ -1,0 +1,6 @@
+image:
+  repository: whomaiamar/order-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1

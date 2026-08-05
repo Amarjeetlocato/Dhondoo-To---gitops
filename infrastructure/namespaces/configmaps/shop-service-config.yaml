@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: shop-service-config
+  namespace: platform
+
+data:
+  SPRING_APPLICATION_NAME: SHOP-SERVICE
+
+  SERVER_PORT: "8084"
+
+  DB_URL: jdbc:mysql://mysql.database.svc.cluster.local:3306/shop
