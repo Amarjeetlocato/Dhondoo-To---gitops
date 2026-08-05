@@ -15,3 +15,5 @@ resources:
 - applications/shop-service.yaml
 
 - applications/order-service.yaml
+
+- applications/chat-service.yaml
