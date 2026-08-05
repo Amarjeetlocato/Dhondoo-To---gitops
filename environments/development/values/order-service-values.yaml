@@ -1,6 +1,5 @@
 image:
   repository: whomaiamar/order-service
-  tag: latest
+  tag: 1c85229078bdc6b3c1427e29800f714908a1f346
   pullPolicy: Always
-
 replicaCount: 1
