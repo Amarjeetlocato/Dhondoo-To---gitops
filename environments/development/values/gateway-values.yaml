@@ -1,0 +1,15 @@
+image:
+  repository: whomaiamar/gateway
+  tag: latest
+
+configMap:
+  data:
+    SPRING_APPLICATION_NAME: gateway
+    SERVER_PORT: "8079"
+
+    EUREKA_SERVER: http://service-registry:8761/eureka/
+
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+    EUREKA_CLIENT_FETCH_REGISTRY: "true"
+
+springProfile: kubernetes
