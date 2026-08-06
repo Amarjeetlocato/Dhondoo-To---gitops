@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS user;
+    CREATE DATABASE IF NOT EXISTS shop;
+    CREATE DATABASE IF NOT EXISTS order;
+    CREATE DATABASE IF NOT EXISTS chat;
+    CREATE DATABASE IF NOT EXISTS notification;
+    CREATE DATABASE IF NOT EXISTS superuser;
+
+    GRANT ALL PRIVILEGES ON user.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON shop.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON order.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON chat.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON notification.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON superuser.* TO 'dhondoo'@'%';
+
+    FLUSH PRIVILEGES;

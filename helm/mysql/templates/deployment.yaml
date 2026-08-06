@@ -43,7 +43,8 @@ spec:
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
-
+            - name: mysql-init
+              mountPath: /docker-entrypoint-initdb.d
           resources:
 {{ toYaml .Values.resources | nindent 12 }}
 
