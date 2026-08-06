@@ -9,7 +9,7 @@ metadata:
     {{- include "dhondoo.labels" . | nindent 4 }}
 
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ default 1 .Values.replicaCount }}
   revisionHistoryLimit: 10
 
   strategy:
@@ -28,36 +28,36 @@ spec:
         {{- include "dhondoo.selectorLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
+{{ toYaml . | indent 8 }}
       {{- end }}
 
     spec:
 
-      {{- with .Values.securityContext }}
+      {{- if .Values.securityContext }}
       securityContext:
-        fsGroup: {{ .fsGroup }}
+        fsGroup: {{ default 1000 .Values.securityContext.fsGroup }}
       {{- end }}
 
       serviceAccountName: {{ include "dhondoo.serviceAccountName" . }}
 
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+{{ toYaml . | indent 8 }}
       {{- end }}
 
       containers:
         - name: {{ include "dhondoo.name" . }}
 
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
 
-          {{- with .Values.securityContext }}
+          {{- if .Values.securityContext }}
           securityContext:
-            runAsUser: {{ .runAsUser }}
-            runAsGroup: {{ .runAsGroup }}
-            runAsNonRoot: {{ .runAsNonRoot }}
-            allowPrivilegeEscalation: {{ .allowPrivilegeEscalation }}
-            readOnlyRootFilesystem: {{ .readOnlyRootFilesystem }}
+            runAsUser: {{ default 1000 .Values.securityContext.runAsUser }}
+            runAsGroup: {{ default 1000 .Values.securityContext.runAsGroup }}
+            runAsNonRoot: {{ default true .Values.securityContext.runAsNonRoot }}
+            allowPrivilegeEscalation: {{ default false .Values.securityContext.allowPrivilegeEscalation }}
+            readOnlyRootFilesystem: {{ default false .Values.securityContext.readOnlyRootFilesystem }}
             capabilities:
               drop:
                 - ALL
@@ -65,15 +65,20 @@ spec:
 
           ports:
             - name: http
-              containerPort: {{ .Values.service.targetPort }}
+              containerPort: {{ default 8080 .Values.service.targetPort }}
               protocol: TCP
 
           env:
+
+            {{- if .Values.springProfile }}
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile | quote }}
+            {{- end }}
 
+            {{- if .Values.timezone }}
             - name: TZ
               value: {{ .Values.timezone | quote }}
+            {{- end }}
 
           {{- if or .Values.configMap.commonName .Values.configMap.existingName .Values.secret.commonName .Values.secret.existingName }}
           envFrom:
@@ -100,43 +105,51 @@ spec:
 
           {{- end }}
 
+          {{- with .Values.resources }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+{{ toYaml . | indent 12 }}
+          {{- end }}
 
+          {{- if .Values.probes.liveness }}
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}
-              port: {{ .Values.service.targetPort }}
-            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+              port: {{ default 8080 $.Values.service.targetPort }}
+            initialDelaySeconds: {{ default 30 .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ default 10 .Values.probes.liveness.periodSeconds }}
+          {{- end }}
 
+          {{- if .Values.probes.readiness }}
           readinessProbe:
             httpGet:
               path: {{ .Values.probes.readiness.path }}
-              port: {{ .Values.service.targetPort }}
-            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+              port: {{ default 8080 $.Values.service.targetPort }}
+            initialDelaySeconds: {{ default 15 .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ default 5 .Values.probes.readiness.periodSeconds }}
+          {{- end }}
 
+          {{- if .Values.probes.startup }}
           startupProbe:
             httpGet:
               path: {{ .Values.probes.startup.path }}
-              port: {{ .Values.service.targetPort }}
-            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
-            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+              port: {{ default 8080 $.Values.service.targetPort }}
+            failureThreshold: {{ default 30 .Values.probes.startup.failureThreshold }}
+            periodSeconds: {{ default 10 .Values.probes.startup.periodSeconds }}
+          {{- end }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
+{{ toYaml . | indent 8 }}
       {{- end }}
 
       {{- with .Values.affinity }}
       affinity:
-        {{- toYaml . | nindent 8 }}
+{{ toYaml . | indent 8 }}
       {{- end }}
 
       {{- with .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
+{{ toYaml . | indent 8 }}
       {{- end }}
 
 {{- end -}}
