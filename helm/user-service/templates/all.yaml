@@ -2,6 +2,14 @@
 
 ---
 
+{{ include "dhondoo.secret" . }}
+
+---
+
+{{ include "dhondoo.configmap" . }}
+
+---
+
 {{ include "dhondoo.deployment" . }}
 
 ---
