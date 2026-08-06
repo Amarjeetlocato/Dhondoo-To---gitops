@@ -1,0 +1,6 @@
+dependencies:
+- name: dhondoo-common
+  repository: file://../common
+  version: 1.0.0
+digest: sha256:8d86dac8b0e6547d42f9a3d78ea68c349f614f6c9eb72473f2527573a0a7fe1f
+generated: "2026-08-06T08:54:28.0765861-07:00"
