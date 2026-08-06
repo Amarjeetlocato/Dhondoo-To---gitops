@@ -17,16 +17,13 @@ spec:
         app: mysql
 
     spec:
-
       securityContext:
         fsGroup: 999
 
       containers:
-
         - name: mysql
 
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
           securityContext:
@@ -43,8 +40,10 @@ spec:
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
+
             - name: mysql-init
               mountPath: /docker-entrypoint-initdb.d
+
           resources:
 {{ toYaml .Values.resources | nindent 12 }}
 
@@ -73,3 +72,7 @@ spec:
         - name: mysql-storage
           persistentVolumeClaim:
             claimName: mysql-pvc
+
+        - name: mysql-init
+          configMap:
+            name: mysql-init
