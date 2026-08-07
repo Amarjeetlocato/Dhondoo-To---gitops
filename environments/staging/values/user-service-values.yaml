@@ -1,0 +1,65 @@
+replicaCount: 1
+
+image:
+  repository: whomaiamar/user-service
+  tag: staging
+  pullPolicy: Always
+
+springProfile: staging
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+configMap:
+  commonName: common-config
+  existingName: user-service-config
+
+secret:
+  commonName: common-secret
+  existingName: user-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 300m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
