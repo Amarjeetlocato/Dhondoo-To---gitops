@@ -1,0 +1,87 @@
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/service-registry
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8761
+  targetPort: 8761
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: eureka
+    SERVER_PORT: "8761"
+
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+    EUREKA_CLIENT_FETCH_REGISTRY: "false"
+
+    SPRING_PROFILES_ACTIVE: production
+
+secret:
+  enabled: false
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+ingress:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false

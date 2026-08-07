@@ -1,0 +1,81 @@
+replicaCount: 1
+
+springProfile: staging
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/gateway
+  tag: staging
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8079
+  targetPort: 8079
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: gateway
+    SERVER_PORT: "8079"
+
+    SPRING_PROFILES_ACTIVE: staging
+
+    EUREKA_SERVER: http://service-registry:8761/eureka/
+
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+    EUREKA_CLIENT_FETCH_REGISTRY: "true"
+
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+
+secret:
+  enabled: true
+  data:
+    JWT_SECRET: CHANGE_ME_IN_STAGING
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 300m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+ingress:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10

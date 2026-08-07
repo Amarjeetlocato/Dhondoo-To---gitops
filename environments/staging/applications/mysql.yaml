@@ -2,35 +2,29 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 
 metadata:
-  name: kafka
+  name: mysql
   namespace: argocd
 
 spec:
-
   project: default
 
   source:
-
     repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
-
     targetRevision: main
+    path: helm/mysql
 
-    path: infrastructure/kafka
+    helm:
+      valueFiles:
+        - ../../environments/staging/values/mysql-values.yaml
 
   destination:
-
     server: https://kubernetes.default.svc
-
-    namespace: messaging
+    namespace: database
 
   syncPolicy:
-
     automated:
-
       prune: true
-
       selfHeal: true
 
     syncOptions:
-
       - CreateNamespace=true

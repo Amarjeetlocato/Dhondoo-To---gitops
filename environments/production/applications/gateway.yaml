@@ -1,0 +1,16 @@
+metadata:
+  name: gateway
+
+spec:
+  source:
+    repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
+    targetRevision: main
+    path: helm/gateway
+
+    helm:
+      valueFiles:
+        - ../../environments/production/values/gateway-values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: platform
