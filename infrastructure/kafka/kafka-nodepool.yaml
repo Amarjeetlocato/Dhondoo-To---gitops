@@ -15,22 +15,21 @@ spec:
 
   storage:
     type: persistent-claim
-    size: 20Gi
+    size: 10Gi
     storageClass: standard
     deleteClaim: false
 
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
-
+      cpu: 250m
+      memory: 512Mi
     limits:
-      cpu: "2"
-      memory: 2Gi
+      cpu: "1"
+      memory: 768Mi
 
   jvmOptions:
-    "-Xms": "512m"
-    "-Xmx": "1g"
+    "-Xms": "256m"
+    "-Xmx": "512m"
 
   template:
     pod:
