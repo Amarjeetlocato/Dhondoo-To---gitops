@@ -63,7 +63,7 @@ podAnnotations: {}
 
 probes:
   startup:
-    path: /actuator/health
+    path: /actuator/health/liveness
     failureThreshold: 30
     periodSeconds: 10
 
