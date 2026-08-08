@@ -38,58 +38,94 @@ permissions:
 jobs:
 
   update-image:
-
     runs-on: ubuntu-latest
 
     steps:
 
       - name: Checkout GitOps Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Read Event Payload
-        id: payload
         shell: bash
         run: |
+
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "SERVICE=${{ inputs.service }}" >> $GITHUB_ENV
-            echo "IMAGE=${{ inputs.image }}" >> $GITHUB_ENV
-            echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
-            echo "ENVIRONMENT=${{ inputs.environment }}" >> $GITHUB_ENV
+            echo "SERVICE=${{ inputs.service }}" >> "$GITHUB_ENV"
+            echo "IMAGE=${{ inputs.image }}" >> "$GITHUB_ENV"
+            echo "TAG=${{ inputs.tag }}" >> "$GITHUB_ENV"
+            echo "ENVIRONMENT=${{ inputs.environment }}" >> "$GITHUB_ENV"
           else
-            echo "SERVICE=${{ github.event.client_payload.service }}" >> $GITHUB_ENV
-            echo "IMAGE=${{ github.event.client_payload.image }}" >> $GITHUB_ENV
-            echo "TAG=${{ github.event.client_payload.tag }}" >> $GITHUB_ENV
-            echo "ENVIRONMENT=${{ github.event.client_payload.environment }}" >> $GITHUB_ENV
+            echo "SERVICE=${{ github.event.client_payload.service }}" >> "$GITHUB_ENV"
+            echo "IMAGE=${{ github.event.client_payload.image }}" >> "$GITHUB_ENV"
+            echo "TAG=${{ github.event.client_payload.tag }}" >> "$GITHUB_ENV"
+            echo "ENVIRONMENT=${{ github.event.client_payload.environment }}" >> "$GITHUB_ENV"
           fi
 
-      - name: Show Payload
+      - name: Validate Payload
+        shell: bash
         run: |
+
           echo "Service: $SERVICE"
           echo "Image: $IMAGE"
           echo "Tag: $TAG"
           echo "Environment: $ENVIRONMENT"
 
+          if [ -z "$SERVICE" ]; then
+            echo "ERROR: SERVICE is empty"
+            exit 1
+          fi
+
+          if [ -z "$IMAGE" ]; then
+            echo "ERROR: IMAGE is empty"
+            exit 1
+          fi
+
+          if [ -z "$TAG" ]; then
+            echo "ERROR: TAG is empty"
+            exit 1
+          fi
+
+          if [ -z "$ENVIRONMENT" ]; then
+            echo "ERROR: ENVIRONMENT is empty"
+            exit 1
+          fi
+
       - name: Install yq
         uses: mikefarah/yq@v4.44.3
+        with:
+          cmd: yq
 
       - name: Update Helm Values
+        shell: bash
         run: |
+
           VALUES_FILE="environments/$ENVIRONMENT/values/$SERVICE-values.yaml"
 
+          echo "Updating:"
+          echo "$VALUES_FILE"
+
           if [ ! -f "$VALUES_FILE" ]; then
-            echo "Values file not found: $VALUES_FILE"
+            echo "ERROR: Values file not found: $VALUES_FILE"
             exit 1
           fi
 
           yq -i ".image.repository = \"$IMAGE\"" "$VALUES_FILE"
           yq -i ".image.tag = \"$TAG\"" "$VALUES_FILE"
 
-      - name: Commit Changes
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          echo ""
+          echo "Updated values:"
+          yq '.image' "$VALUES_FILE"
 
-          git add .
+      - name: Commit Changes
+        shell: bash
+        run: |
+
+          git config user.name "Dhondoo GitOps Bot"
+          git config user.email "actions@github.com"
+
+          git add "environments/$ENVIRONMENT/values/$SERVICE-values.yaml"
 
           if git diff --cached --quiet; then
             echo "No changes detected."
@@ -99,5 +135,6 @@ jobs:
           git commit -m "ci: deploy $SERVICE:$TAG"
 
       - name: Push Changes
+        shell: bash
         run: |
-          git push
+          git push origin HEAD:main
