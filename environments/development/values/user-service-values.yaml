@@ -1,5 +1,5 @@
 image:
   repository: whomaiamar/user-registry
-  tag: 1c85229078bdc6b3c1427e29800f714908a1f346
+  tag: 575c1da539c365f73a4a4d869bf40449017bf716
   pullPolicy: Always
 replicaCount: 1
