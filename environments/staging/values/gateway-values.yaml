@@ -22,12 +22,12 @@ configMap:
 
     SPRING_PROFILES_ACTIVE: staging
 
-    EUREKA_SERVER: http://service-registry:8761/eureka/
+  EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/" 
 
-    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
-    EUREKA_CLIENT_FETCH_REGISTRY: "true"
+  EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+  EUREKA_CLIENT_FETCH_REGISTRY: "true"
 
-    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
 
 secret:
   enabled: true
