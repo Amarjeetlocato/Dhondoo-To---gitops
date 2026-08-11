@@ -110,15 +110,21 @@ podAnnotations: {}
 probes:
   startup:
     path: /actuator/health
-    failureThreshold: 30
+    initialDelaySeconds: 10
     periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
 
   readiness:
     path: /actuator/health/readiness
     initialDelaySeconds: 30
-    periodSeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
 
   liveness:
     path: /actuator/health/liveness
     initialDelaySeconds: 60
     periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
