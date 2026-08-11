@@ -22,7 +22,7 @@ configMap:
     SERVER_PORT: "8079"
     SERVER_ADDRESS: "0.0.0.0"
 
-    FRONTEND_URL: "http://localhost:51006"
+    FRONTEND_URL: "http://127.0.0.1:51006"
 
     EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
