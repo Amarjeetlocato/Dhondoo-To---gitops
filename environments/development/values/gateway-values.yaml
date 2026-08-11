@@ -1,51 +1,40 @@
 image:
   repository: whomaiamar/gateway
-  tag: f69c848e487bff2f871c47900ed5cae2a6c27beb
+  tag: 1d7f40cc81b73cf251b195da8660b55a19e7cdd4
   pullPolicy: Always
-
 replicaCount: 1
-
 springProfile: kubernetes
 timezone: UTC
-
 service:
   type: ClusterIP
   port: 8079
   targetPort: 8079
-
 configMap:
   enabled: true
   existingName: gateway-gateway
-
   data:
     SPRING_APPLICATION_NAME: gateway
     SERVER_PORT: "8079"
     SERVER_ADDRESS: "0.0.0.0"
 
-    FRONTEND_URL: "http://localhost:51006"
+    FRONTEND_URL: "http://localhost:53410"
 
     EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
     EUREKA_CLIENT_FETCH_REGISTRY: "true"
-
     EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS: "10"
     EUREKA_CLIENT_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS: "30"
     EUREKA_INSTANCE_HOSTNAME: "gateway"
     EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
     EUREKA_CLIENT_HEALTHCHECK_ENABLED: "true"
-
     SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED: "true"
     SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID: "true"
-
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
-
     MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
-
 secret:
   enabled: false
   existingName: gateway-secret
-
 serviceAccount:
   create: true
