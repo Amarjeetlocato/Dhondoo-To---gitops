@@ -1,5 +1,6 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
+
 metadata:
   name: dhondoo-kafka-pool
   namespace: messaging
@@ -7,7 +8,7 @@ metadata:
     strimzi.io/cluster: dhondoo-kafka
 
 spec:
-  replicas: 3
+  replicas: 1
 
   roles:
     - broker
@@ -36,3 +37,4 @@ spec:
       metadata:
         labels:
           app: kafka
+
