@@ -1,23 +1,55 @@
 # helm/common/templates/_deployment.tpl
 
 {{- define "dhondoo.deployment" -}}
+
+{{- /*
+  Normalize optional nested values so Helm never attempts to access
+  a child property from a nil parent object.
+*/ -}}
+
+{{- $strategy := .Values.strategy | default dict -}}
+{{- $rollingUpdate := $strategy.rollingUpdate | default dict -}}
+
+{{- $podAntiAffinity := .Values.podAntiAffinity | default dict -}}
+{{- $topologySpreadConstraints := .Values.topologySpreadConstraints | default dict -}}
+
+{{- $containerSecurityContext := .Values.containerSecurityContext | default dict -}}
+
+{{- $configMap := .Values.configMap | default dict -}}
+{{- $secret := .Values.secret | default dict -}}
+
+{{- $java := .Values.java | default dict -}}
+
+{{- $lifecycle := .Values.lifecycle | default dict -}}
+{{- $preStop := $lifecycle.preStop | default dict -}}
+
+{{- $probes := .Values.probes | default dict -}}
+{{- $startupProbe := $probes.startup | default dict -}}
+{{- $readinessProbe := $probes.readiness | default dict -}}
+{{- $livenessProbe := $probes.liveness | default dict -}}
+
+{{- $strategyType := $strategy.type | default "RollingUpdate" -}}
+
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: {{ include "dhondoo.fullname" . }}
   labels:
     {{- include "dhondoo.labels" . | nindent 4 }}
+
 spec:
   replicas: {{ default 1 .Values.replicaCount }}
   revisionHistoryLimit: {{ default 10 .Values.revisionHistoryLimit }}
   minReadySeconds: {{ default 0 .Values.minReadySeconds }}
 
   strategy:
-    type: {{ default "RollingUpdate" .Values.strategy.type }}
-    {{- if eq (default "RollingUpdate" .Values.strategy.type) "RollingUpdate" }}
+    type: {{ $strategyType }}
+
+    {{- if eq $strategyType "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: {{ default 0 .Values.strategy.rollingUpdate.maxUnavailable }}
-      maxSurge: {{ default 1 .Values.strategy.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ $rollingUpdate.maxUnavailable | default 0 }}
+      maxSurge: {{ $rollingUpdate.maxSurge | default 1 }}
     {{- end }}
 
   selector:
@@ -25,15 +57,18 @@ spec:
       {{- include "dhondoo.selectorLabels" . | nindent 6 }}
 
   template:
+
     metadata:
       labels:
         {{- include "dhondoo.selectorLabels" . | nindent 8 }}
+
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
     spec:
+
       terminationGracePeriodSeconds: {{ default 30 .Values.terminationGracePeriodSeconds }}
 
       {{- if .Values.securityContext }}
@@ -42,10 +77,12 @@ spec:
         runAsUser: {{ default 1000 .Values.securityContext.runAsUser }}
         runAsGroup: {{ default 1000 .Values.securityContext.runAsGroup }}
         fsGroup: {{ default 1000 .Values.securityContext.fsGroup }}
+
         {{- if hasKey .Values.securityContext "seccompProfile" }}
         seccompProfile:
           {{- toYaml .Values.securityContext.seccompProfile | nindent 10 }}
         {{- end }}
+
       {{- end }}
 
       serviceAccountName: {{ include "dhondoo.serviceAccountName" . }}
@@ -65,40 +102,52 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
-      {{- if or .Values.affinity .Values.podAntiAffinity.enabled }}
+      {{- if or .Values.affinity $podAntiAffinity.enabled }}
+
       affinity:
+
         {{- with .Values.affinity }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
 
-        {{- if and .Values.podAntiAffinity.enabled (not .Values.affinity.podAntiAffinity) }}
+        {{- if and $podAntiAffinity.enabled (not .Values.affinity.podAntiAffinity) }}
+
         podAntiAffinity:
-          {{- if eq .Values.podAntiAffinity.type "required" }}
+
+          {{- if eq ($podAntiAffinity.type | default "preferred") "required" }}
+
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchLabels:
                   {{- include "dhondoo.selectorLabels" . | nindent 18 }}
-              topologyKey: {{ default "kubernetes.io/hostname" .Values.podAntiAffinity.topologyKey }}
+              topologyKey: {{ default "kubernetes.io/hostname" $podAntiAffinity.topologyKey }}
+
           {{- else }}
+
           preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: {{ default 100 .Values.podAntiAffinity.weight }}
+            - weight: {{ default 100 $podAntiAffinity.weight }}
               podAffinityTerm:
                 labelSelector:
                   matchLabels:
                     {{- include "dhondoo.selectorLabels" . | nindent 20 }}
-                topologyKey: {{ default "kubernetes.io/hostname" .Values.podAntiAffinity.topologyKey }}
+                topologyKey: {{ default "kubernetes.io/hostname" $podAntiAffinity.topologyKey }}
+
           {{- end }}
+
         {{- end }}
+
       {{- end }}
 
-      {{- if .Values.topologySpreadConstraints.enabled }}
+      {{- if $topologySpreadConstraints.enabled }}
+
       topologySpreadConstraints:
-        - maxSkew: {{ default 1 .Values.topologySpreadConstraints.maxSkew }}
-          topologyKey: {{ default "kubernetes.io/hostname" .Values.topologySpreadConstraints.topologyKey }}
-          whenUnsatisfiable: {{ default "ScheduleAnyway" .Values.topologySpreadConstraints.whenUnsatisfiable }}
+        - maxSkew: {{ default 1 $topologySpreadConstraints.maxSkew }}
+          topologyKey: {{ default "kubernetes.io/hostname" $topologySpreadConstraints.topologyKey }}
+          whenUnsatisfiable: {{ default "ScheduleAnyway" $topologySpreadConstraints.whenUnsatisfiable }}
           labelSelector:
             matchLabels:
               {{- include "dhondoo.selectorLabels" . | nindent 14 }}
+
       {{- end }}
 
       {{- with .Values.extraVolumes }}
@@ -107,20 +156,25 @@ spec:
       {{- end }}
 
       containers:
+
         - name: {{ include "dhondoo.name" . }}
+
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
 
-          {{- if .Values.containerSecurityContext.enabled }}
+          {{- if $containerSecurityContext.enabled }}
+
           securityContext:
-            runAsUser: {{ default 1000 .Values.securityContext.runAsUser }}
-            runAsGroup: {{ default 1000 .Values.securityContext.runAsGroup }}
-            runAsNonRoot: {{ default true .Values.securityContext.runAsNonRoot }}
-            allowPrivilegeEscalation: {{ default false .Values.securityContext.allowPrivilegeEscalation }}
-            readOnlyRootFilesystem: {{ default false .Values.securityContext.readOnlyRootFilesystem }}
+            runAsUser: {{ default 1000 $containerSecurityContext.runAsUser }}
+            runAsGroup: {{ default 1000 $containerSecurityContext.runAsGroup }}
+            runAsNonRoot: {{ default true $containerSecurityContext.runAsNonRoot }}
+            allowPrivilegeEscalation: {{ default false $containerSecurityContext.allowPrivilegeEscalation }}
+            readOnlyRootFilesystem: {{ default false $containerSecurityContext.readOnlyRootFilesystem }}
+
             capabilities:
               drop:
                 - ALL
+
           {{- end }}
 
           ports:
@@ -129,6 +183,7 @@ spec:
               protocol: TCP
 
           env:
+
             {{- if .Values.springProfile }}
             - name: SPRING_PROFILES_ACTIVE
               value: {{ .Values.springProfile | quote }}
@@ -139,41 +194,43 @@ spec:
               value: {{ .Values.timezone | quote }}
             {{- end }}
 
-            {{- if .Values.java.enabled }}
+            {{- if $java.enabled }}
             - name: JAVA_TOOL_OPTIONS
-              value: {{ .Values.java.options | quote }}
+              value: {{ $java.options | quote }}
             {{- end }}
 
             {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
 
-          {{- if or .Values.envFrom .Values.configMap.commonName .Values.configMap.existingName .Values.secret.commonName .Values.secret.existingName }}
+          {{- if or .Values.envFrom $configMap.commonName $configMap.existingName $secret.commonName $secret.existingName }}
+
           envFrom:
 
             {{- with .Values.envFrom }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
 
-            {{- if .Values.configMap.commonName }}
+            {{- if $configMap.commonName }}
             - configMapRef:
-                name: {{ .Values.configMap.commonName }}
+                name: {{ $configMap.commonName }}
             {{- end }}
 
-            {{- if .Values.configMap.existingName }}
+            {{- if $configMap.existingName }}
             - configMapRef:
-                name: {{ .Values.configMap.existingName }}
+                name: {{ $configMap.existingName }}
             {{- end }}
 
-            {{- if .Values.secret.commonName }}
+            {{- if $secret.commonName }}
             - secretRef:
-                name: {{ .Values.secret.commonName }}
+                name: {{ $secret.commonName }}
             {{- end }}
 
-            {{- if .Values.secret.existingName }}
+            {{- if $secret.existingName }}
             - secretRef:
-                name: {{ .Values.secret.existingName }}
+                name: {{ $secret.existingName }}
             {{- end }}
+
           {{- end }}
 
           {{- with .Values.extraVolumeMounts }}
@@ -181,56 +238,70 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
 
-          {{- if .Values.lifecycle.enabled }}
+          {{- if $lifecycle.enabled }}
+
           lifecycle:
-            {{- if .Values.lifecycle.preStop.enabled }}
+
+            {{- if $preStop.enabled }}
+
             preStop:
               exec:
                 command:
-                  {{- toYaml .Values.lifecycle.preStop.command | nindent 18 }}
+                  {{- toYaml $preStop.command | nindent 18 }}
+
             {{- end }}
+
           {{- end }}
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          {{- if .Values.probes.startup.enabled }}
+          {{- if $startupProbe.enabled }}
+
           startupProbe:
             httpGet:
-              path: {{ .Values.probes.startup.path }}
+              path: {{ $startupProbe.path }}
               port: http
               scheme: HTTP
-            initialDelaySeconds: {{ default 10 .Values.probes.startup.initialDelaySeconds }}
-            timeoutSeconds: {{ default 5 .Values.probes.startup.timeoutSeconds }}
-            periodSeconds: {{ default 5 .Values.probes.startup.periodSeconds }}
-            failureThreshold: {{ default 36 .Values.probes.startup.failureThreshold }}
-            successThreshold: {{ default 1 .Values.probes.startup.successThreshold }}
+
+            initialDelaySeconds: {{ default 10 $startupProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ default 5 $startupProbe.timeoutSeconds }}
+            periodSeconds: {{ default 5 $startupProbe.periodSeconds }}
+            failureThreshold: {{ default 36 $startupProbe.failureThreshold }}
+            successThreshold: {{ default 1 $startupProbe.successThreshold }}
+
           {{- end }}
 
-          {{- if .Values.probes.readiness.enabled }}
+          {{- if $readinessProbe.enabled }}
+
           readinessProbe:
             httpGet:
-              path: {{ .Values.probes.readiness.path }}
+              path: {{ $readinessProbe.path }}
               port: http
               scheme: HTTP
-            initialDelaySeconds: {{ default 10 .Values.probes.readiness.initialDelaySeconds }}
-            timeoutSeconds: {{ default 5 .Values.probes.readiness.timeoutSeconds }}
-            periodSeconds: {{ default 10 .Values.probes.readiness.periodSeconds }}
-            failureThreshold: {{ default 6 .Values.probes.readiness.failureThreshold }}
-            successThreshold: {{ default 1 .Values.probes.readiness.successThreshold }}
+
+            initialDelaySeconds: {{ default 10 $readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ default 5 $readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ default 10 $readinessProbe.periodSeconds }}
+            failureThreshold: {{ default 6 $readinessProbe.failureThreshold }}
+            successThreshold: {{ default 1 $readinessProbe.successThreshold }}
+
           {{- end }}
 
-          {{- if .Values.probes.liveness.enabled }}
+          {{- if $livenessProbe.enabled }}
+
           livenessProbe:
             httpGet:
-              path: {{ .Values.probes.liveness.path }}
+              path: {{ $livenessProbe.path }}
               port: http
               scheme: HTTP
-            initialDelaySeconds: {{ default 10 .Values.probes.liveness.initialDelaySeconds }}
-            timeoutSeconds: {{ default 5 .Values.probes.liveness.timeoutSeconds }}
-            periodSeconds: {{ default 20 .Values.probes.liveness.periodSeconds }}
-            failureThreshold: {{ default 3 .Values.probes.liveness.failureThreshold }}
-            successThreshold: {{ default 1 .Values.probes.liveness.successThreshold }}
+
+            initialDelaySeconds: {{ default 10 $livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ default 5 $livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ default 20 $livenessProbe.periodSeconds }}
+            failureThreshold: {{ default 3 $livenessProbe.failureThreshold }}
+            successThreshold: {{ default 1 $livenessProbe.successThreshold }}
+
           {{- end }}
 
 {{- end -}}

@@ -1,4 +1,4 @@
-# environments/production/values/order-service-values.yaml
+# environments/production/values/chat-service-values.yaml
 
 replicaCount: 3
 
@@ -6,22 +6,22 @@ springProfile: production
 timezone: UTC
 
 image:
-  repository: whomaiamar/order-service
+  repository: whomaiamar/chat-service
   tag: v1.0.0
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
-  port: 8086
-  targetPort: 8086
+  port: 8085
+  targetPort: 8085
 
 configMap:
   commonName: common-config
-  existingName: order-service-config
+  existingName: chat-service-config
 
 secret:
   commonName: common-secret
-  existingName: order-service-secret
+  existingName: chat-service-secret
 
 serviceAccount:
   create: true
@@ -143,7 +143,7 @@ java:
   options: "-XX:MaxRAMPercentage=70 -XX:InitialRAMPercentage=25 -XX:+UseG1GC"
 
 nodeSelector: {}
-tolerations: {}
+tolerations: []
 affinity: {}
 imagePullSecrets: []
 podAnnotations: {}

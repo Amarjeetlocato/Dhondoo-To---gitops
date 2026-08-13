@@ -143,7 +143,7 @@ java:
   options: "-XX:MaxRAMPercentage=70 -XX:InitialRAMPercentage=25 -XX:+UseG1GC"
 
 nodeSelector: {}
-tolerations: {}
+tolerations: []
 affinity: {}
 imagePullSecrets: []
 podAnnotations: {}
