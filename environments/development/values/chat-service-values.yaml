@@ -1,6 +1,5 @@
 image:
   repository: whomaiamar/chat-service
-  tag: latest
+  tag: 046b5ecc1a0b844a4e8c3a8d6d2bd0e3bf6a7cef
   pullPolicy: Always
-
 replicaCount: 1
