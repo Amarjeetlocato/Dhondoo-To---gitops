@@ -1,3 +1,5 @@
+# helm/common/templates/_hpa.tpl
+
 {{- define "dhondoo.hpa" -}}
 
 {{- if .Values.autoscaling.enabled }}
@@ -26,6 +28,32 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+
+    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+
+  {{- if .Values.autoscaling.behavior.enabled }}
+  behavior:
+
+    scaleUp:
+      stabilizationWindowSeconds: {{ default 0 .Values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds }}
+      selectPolicy: {{ default "Max" .Values.autoscaling.behavior.scaleUp.selectPolicy }}
+      policies:
+        {{- toYaml .Values.autoscaling.behavior.scaleUp.policies | nindent 8 }}
+
+    scaleDown:
+      stabilizationWindowSeconds: {{ default 300 .Values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds }}
+      selectPolicy: {{ default "Min" .Values.autoscaling.behavior.scaleDown.selectPolicy }}
+      policies:
+        {{- toYaml .Values.autoscaling.behavior.scaleDown.policies | nindent 8 }}
+
+  {{- end }}
 
 {{- end }}
 

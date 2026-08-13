@@ -1,3 +1,5 @@
+# helm/common/templates/_configmap.tpl
+
 {{- define "dhondoo.configmap" -}}
 
 {{- if .Values.configMap.enabled }}
@@ -7,14 +9,15 @@ kind: ConfigMap
 
 metadata:
   name: {{ include "dhondoo.fullname" . }}
+
   labels:
     {{- include "dhondoo.labels" . | nindent 4 }}
 
 data:
-{{- range $key, $value := .Values.configMap.data }}
-  {{ $key }}: {{ $value | quote }}
-{{- end }}
+  {{- with .Values.configMap.data }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
 
 {{- end }}
 
-{{- end -}}
+{{- end }}
