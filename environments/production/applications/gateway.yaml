@@ -1,12 +1,19 @@
+# environments/production/applications/gateway.yaml
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: gateway
-
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
 spec:
+  project: default
+
   source:
     repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
     targetRevision: main
     path: helm/gateway
-
     helm:
       valueFiles:
         - ../../environments/production/values/gateway-values.yaml
@@ -14,3 +21,24 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: platform
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+
+  revisionHistoryLimit: 10

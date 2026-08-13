@@ -1,0 +1,49 @@
+# infrastructure/monitoring/prometheus.yaml
+
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+
+metadata:
+  name: dhondoo-prometheus
+  namespace: monitoring
+
+  labels:
+    app.kubernetes.io/part-of: dhondoo
+    app.kubernetes.io/component: monitoring
+
+spec:
+  replicas: 1
+
+  serviceAccountName: prometheus-dhondoo
+
+  serviceMonitorSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+
+  ruleSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+
+  serviceMonitorNamespaceSelector:
+    matchNames:
+      - monitoring
+
+  ruleNamespaceSelector:
+    matchNames:
+      - monitoring
+
+  retention: 7d
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 2Gi
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    fsGroup: 65534

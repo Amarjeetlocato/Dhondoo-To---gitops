@@ -1,14 +1,20 @@
+# environments/development/values/gateway-values.yaml
+
+replicaCount: 1
+
+springProfile: kubernetes
+timezone: UTC
+
 image:
   repository: whomaiamar/gateway
   tag: ceb7da82d9cb8dbc5b1052e3842aad2bf525ebf0
   pullPolicy: Always
-replicaCount: 1
-springProfile: kubernetes
-timezone: UTC
+
 service:
   type: ClusterIP
   port: 8079
   targetPort: 8079
+
 configMap:
   enabled: true
   existingName: gateway-gateway
@@ -31,8 +37,72 @@ configMap:
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
     MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
+
 secret:
   enabled: false
   existingName: gateway-secret
+
 serviceAccount:
   create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+ingress:
+  enabled: false
+
+topologySpreadConstraints:
+  enabled: false
+
+podAntiAffinity:
+  enabled: false
+
+probes:
+  startup:
+    enabled: true
+    path: /actuator/health
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 5
+    failureThreshold: 36
+    successThreshold: 1
+
+  readiness:
+    enabled: true
+    path: /actuator/health/readiness
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+    successThreshold: 1
+
+  liveness:
+    enabled: true
+    path: /actuator/health/liveness
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 20
+    failureThreshold: 3
+    successThreshold: 1
+
+terminationGracePeriodSeconds: 30
+
+lifecycle:
+  enabled: true
+  preStop:
+    enabled: true
+    command:
+      - /bin/sh
+      - -c
+      - sleep 5

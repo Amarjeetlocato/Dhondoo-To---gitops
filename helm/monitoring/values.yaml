@@ -1,0 +1,191 @@
+# ============================================================
+# DHONDOO MONITORING
+# DEFAULT / LOCAL VALUES
+# ============================================================
+
+kube-prometheus-stack:
+
+  # ----------------------------------------------------------
+  # CRDs
+  # ----------------------------------------------------------
+
+  crds:
+    enabled: true
+
+  # ----------------------------------------------------------
+  # DEFAULT ALERTING RULES
+  # ----------------------------------------------------------
+
+  defaultRules:
+    create: true
+
+  # ----------------------------------------------------------
+  # PROMETHEUS OPERATOR
+  # ----------------------------------------------------------
+
+  prometheusOperator:
+
+    enabled: true
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # ----------------------------------------------------------
+  # PROMETHEUS
+  # ----------------------------------------------------------
+
+  prometheus:
+
+    enabled: true
+
+    prometheusSpec:
+
+      replicas: 1
+
+      retention: 7d
+
+      scrapeInterval: 30s
+
+      evaluationInterval: 30s
+
+      serviceMonitorSelectorNilUsesHelmValues: false
+
+      serviceMonitorSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: dhondoo
+
+      serviceMonitorNamespaceSelector:
+        matchNames:
+          - monitoring
+
+      ruleSelectorNilUsesHelmValues: false
+
+      ruleSelector:
+        matchLabels:
+          app.kubernetes.io/part-of: dhondoo
+
+      ruleNamespaceSelector:
+        matchNames:
+          - monitoring
+
+      resources:
+
+        requests:
+          cpu: 250m
+          memory: 512Mi
+
+        limits:
+          cpu: "1"
+          memory: 2Gi
+
+      podAntiAffinity: "soft"
+
+      securityContext:
+
+        runAsNonRoot: true
+
+        runAsUser: 65534
+
+        runAsGroup: 65534
+
+        fsGroup: 65534
+
+  # ----------------------------------------------------------
+  # ALERTMANAGER
+  # ----------------------------------------------------------
+
+  alertmanager:
+
+    enabled: true
+
+    alertmanagerSpec:
+
+      replicas: 1
+
+      resources:
+
+        requests:
+          cpu: 100m
+          memory: 128Mi
+
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+      securityContext:
+
+        runAsNonRoot: true
+
+        runAsUser: 65534
+
+        runAsGroup: 65534
+
+        fsGroup: 65534
+
+  # ----------------------------------------------------------
+  # GRAFANA
+  # ----------------------------------------------------------
+
+  grafana:
+
+    enabled: true
+
+    replicas: 1
+
+    resources:
+
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    service:
+
+      type: ClusterIP
+
+      port: 3000
+
+    securityContext:
+
+      runAsNonRoot: true
+
+      runAsUser: 472
+
+      runAsGroup: 472
+
+      fsGroup: 472
+
+  # ----------------------------------------------------------
+  # KUBE STATE METRICS
+  # ----------------------------------------------------------
+
+  kubeStateMetrics:
+
+    enabled: true
+
+  # ----------------------------------------------------------
+  # NODE EXPORTER
+  # ----------------------------------------------------------
+
+  nodeExporter:
+
+    enabled: true
+
+    resources:
+
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+      limits:
+        cpu: 200m
+        memory: 256Mi

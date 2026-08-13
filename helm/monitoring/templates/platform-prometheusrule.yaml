@@ -1,0 +1,236 @@
+apiVersion: monitoring.coreos.com/v1
+
+kind: PrometheusRule
+
+metadata:
+
+  name: dhondoo-platform-alerts
+
+  namespace: monitoring
+
+  labels:
+
+    app.kubernetes.io/name: dhondoo-platform-alerts
+
+    app.kubernetes.io/part-of: dhondoo
+
+spec:
+
+  groups:
+
+    # ========================================================
+    # POD HEALTH
+    # ========================================================
+
+    - name: dhondoo.pods
+
+      rules:
+
+        - alert: DhondooPodCrashLooping
+
+          expr: |
+            increase(
+              kube_pod_container_status_restarts_total{
+                namespace="platform"
+              }[15m]
+            ) > 3
+
+          for: 5m
+
+          labels:
+
+            severity: critical
+
+            team: dhondoo
+
+          annotations:
+
+            summary: Dhondoo pod is repeatedly restarting
+
+            description: >
+              A Dhondoo platform container restarted more than
+              three times during the last fifteen minutes.
+
+        - alert: DhondooPodNotReady
+
+          expr: |
+            kube_pod_status_ready{
+              namespace="platform",
+              condition="true"
+            } == 0
+
+          for: 10m
+
+          labels:
+
+            severity: warning
+
+            team: dhondoo
+
+          annotations:
+
+            summary: Dhondoo pod is not ready
+
+            description: >
+              A Dhondoo platform pod has remained unready
+              for more than ten minutes.
+
+        - alert: DhondooDeploymentUnavailable
+
+          expr: |
+            kube_deployment_status_replicas_available{
+              namespace="platform"
+            }
+            <
+            kube_deployment_spec_replicas{
+              namespace="platform"
+            }
+
+          for: 10m
+
+          labels:
+
+            severity: critical
+
+            team: dhondoo
+
+          annotations:
+
+            summary: Dhondoo deployment has unavailable replicas
+
+            description: >
+              One or more desired Dhondoo platform replicas
+              are unavailable.
+
+    # ========================================================
+    # CPU
+    # ========================================================
+
+    - name: dhondoo.resources
+
+      rules:
+
+        - alert: DhondooHighCPU
+
+          expr: |
+            (
+              sum by (namespace, pod) (
+                rate(
+                  container_cpu_usage_seconds_total{
+                    namespace="platform",
+                    container!="",
+                    container!="POD"
+                  }[5m]
+                )
+              )
+            )
+            /
+            (
+              sum by (namespace, pod) (
+                kube_pod_container_resource_requests{
+                  namespace="platform",
+                  resource="cpu",
+                  unit="core"
+                }
+              )
+            )
+            > 0.85
+
+          for: 10m
+
+          labels:
+
+            severity: warning
+
+            team: dhondoo
+
+          annotations:
+
+            summary: Dhondoo pod CPU usage is high
+
+            description: >
+              CPU usage has exceeded 85 percent of the
+              requested CPU for ten minutes.
+
+        # ====================================================
+        # MEMORY
+        # ====================================================
+
+        - alert: DhondooHighMemory
+
+          expr: |
+            (
+              sum by (namespace, pod) (
+                container_memory_working_set_bytes{
+                  namespace="platform",
+                  container!="",
+                  container!="POD"
+                }
+              )
+            )
+            /
+            (
+              sum by (namespace, pod) (
+                kube_pod_container_resource_requests{
+                  namespace="platform",
+                  resource="memory",
+                  unit="byte"
+                }
+              )
+            )
+            > 0.85
+
+          for: 10m
+
+          labels:
+
+            severity: warning
+
+            team: dhondoo
+
+          annotations:
+
+            summary: Dhondoo pod memory usage is high
+
+            description: >
+              Memory usage has exceeded 85 percent of the
+              requested memory for ten minutes.
+
+    # ========================================================
+    # JVM
+    # ========================================================
+
+    - name: dhondoo.jvm
+
+      rules:
+
+        - alert: DhondooJVMHighHeap
+
+          expr: |
+            (
+              jvm_memory_used_bytes{
+                namespace="platform",
+                area="heap"
+              }
+              /
+              jvm_memory_max_bytes{
+                namespace="platform",
+                area="heap"
+              }
+            ) > 0.85
+
+          for: 10m
+
+          labels:
+
+            severity: warning
+
+            team: dhondoo
+
+          annotations:
+
+            summary: Dhondoo JVM heap usage is high
+
+            description: >
+              JVM heap usage has exceeded 85 percent
+              for ten minutes.

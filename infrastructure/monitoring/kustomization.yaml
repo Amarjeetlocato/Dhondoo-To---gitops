@@ -1,0 +1,17 @@
+# infrastructure/monitoring/kustomization.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - namespace.yaml
+  - prometheus-rbac.yaml
+  - prometheus.yaml
+  - prometheus-service.yaml
+  - alertmanager.yaml
+  - grafana.yaml
+  - grafana-service.yaml
+  - service-monitor.yaml
+  - prometheus-rule.yaml

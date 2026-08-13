@@ -1,0 +1,24 @@
+# infrastructure/monitoring/prometheus-service.yaml
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: prometheus
+  namespace: monitoring
+
+  labels:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: dhondoo
+
+spec:
+  type: ClusterIP
+
+  selector:
+    prometheus: dhondoo-prometheus
+
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+      protocol: TCP

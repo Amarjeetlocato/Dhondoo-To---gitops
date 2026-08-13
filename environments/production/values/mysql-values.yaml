@@ -1,3 +1,5 @@
+# environments/production/values/mysql-values.yaml
+
 replicaCount: 1
 
 image:
@@ -10,48 +12,64 @@ service:
   port: 3306
   targetPort: 3306
 
-mysql:
-  rootPassword: CHANGE_ME
-  database: dhondoo
-  username: dhondoo
-  password: CHANGE_ME
-
-configMap:
-  enabled: false
-
-secret:
-  enabled: true
-
-serviceAccount:
-  create: true
-
 persistence:
   enabled: true
   accessMode: ReadWriteOnce
   size: 50Gi
+  storageClass: ""
+
+mysql:
+  database: dhondoo
+  username: dhondoo
+
+existingSecret: mysql-secret
 
 resources:
   requests:
-    cpu: "1"
-    memory: 2Gi
+    cpu: 500m
+    memory: 1Gi
   limits:
-    cpu: "4"
+    cpu: "2"
     memory: 4Gi
 
+probes:
+  startup:
+    enabled: true
+    initialDelaySeconds: 20
+    timeoutSeconds: 5
+    periodSeconds: 5
+    failureThreshold: 60
+
+  readiness:
+    enabled: true
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+
+  liveness:
+    enabled: true
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 20
+    failureThreshold: 3
+
 securityContext:
-  runAsNonRoot: true
-  runAsUser: 999
-  runAsGroup: 999
-  fsGroup: 999
-  allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: false
+  runAsNonRoot: false
+
+podSecurityContext: {}
+
+terminationGracePeriodSeconds: 60
+
+pdb:
+  enabled: false
+
+podAntiAffinity:
+  enabled: false
+
+topologySpreadConstraints:
+  enabled: false
 
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
-
-imagePullSecrets: []
-
-podAnnotations: {}

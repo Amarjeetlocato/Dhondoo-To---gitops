@@ -1,10 +1,10 @@
+# environments/production/applications/mysql.yaml
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
-
 metadata:
   name: mysql
   namespace: argocd
-
 spec:
   project: default
 
@@ -12,7 +12,6 @@ spec:
     repoURL: https://github.com/Amarjeetlocato/Dhondoo-To---gitops.git
     targetRevision: main
     path: helm/mysql
-
     helm:
       valueFiles:
         - ../../environments/production/values/mysql-values.yaml
@@ -25,6 +24,19 @@ spec:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m
 
     syncOptions:
       - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
+
+  revisionHistoryLimit: 10

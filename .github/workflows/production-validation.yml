@@ -1,0 +1,145 @@
+name: Production Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  helm-lint:
+    name: Helm Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Build common dependency
+        working-directory: helm/common
+        run: |
+          helm dependency build
+
+      - name: Lint all application charts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for chart in helm/*; do
+            if [[ -f "$chart/Chart.yaml" && "$chart" != "helm/common" && "$chart" != "helm/mysql" ]]; then
+              echo "========================================"
+              echo "Linting: $chart"
+              echo "========================================"
+              helm lint "$chart"
+            fi
+          done
+
+  helm-template:
+    name: Helm Template Validation
+    runs-on: ubuntu-latest
+    needs: helm-lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for chart in helm/*; do
+            if [[ -f "$chart/Chart.yaml" ]]; then
+              helm dependency build "$chart" || true
+            fi
+          done
+
+      - name: Render development charts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for chart in helm/gateway \
+                       helm/user-service \
+                       helm/shop-service \
+                       helm/order-service \
+                       helm/chat-service \
+                       helm/notification-service \
+                       helm/service-registry \
+                       helm/superuser-service; do
+
+            name="$(basename "$chart")"
+
+            echo "Rendering development: $name"
+
+            helm template "$name" "$chart" \
+              -f "environments/development/values/${name}-values.yaml" \
+              > "/tmp/${name}-development.yaml"
+          done
+
+      - name: Render production charts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for chart in helm/gateway \
+                       helm/user-service \
+                       helm/shop-service \
+                       helm/order-service \
+                       helm/chat-service \
+                       helm/notification-service \
+                       helm/service-registry \
+                       helm/superuser-service; do
+
+            name="$(basename "$chart")"
+
+            echo "Rendering production: $name"
+
+            helm template "$name" "$chart" \
+              -f "environments/production/values/${name}-values.yaml" \
+              > "/tmp/${name}-production.yaml"
+          done
+
+      - name: Validate rendered YAML
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for file in /tmp/*-development.yaml /tmp/*-production.yaml; do
+            echo "Validating $file"
+            test -s "$file"
+          done
+
+  kubernetes-validation:
+    name: Kubernetes Manifest Validation
+    runs-on: ubuntu-latest
+    needs: helm-template
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Validate repository YAML
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          find environments infrastructure applications \
+            -type f \
+            \( -name "*.yaml" -o -name "*.yml" \) \
+            -print

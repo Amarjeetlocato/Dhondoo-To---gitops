@@ -19,3 +19,5 @@ resources:
 - applications/chat-service.yaml
 
 - applications/gateway.yaml
+
+- applications/monitoring.yaml

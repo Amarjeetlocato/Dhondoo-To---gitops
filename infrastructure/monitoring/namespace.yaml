@@ -1,0 +1,11 @@
+# infrastructure/monitoring/namespace.yaml
+
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: monitoring
+
+  labels:
+    app.kubernetes.io/part-of: dhondoo
+    app.kubernetes.io/component: monitoring

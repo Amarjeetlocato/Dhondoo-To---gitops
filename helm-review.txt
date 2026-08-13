@@ -1,0 +1,2340 @@
+
+============================================================
+FILE: helm\common\Chart.yaml
+============================================================
+apiVersion: v2
+
+name: dhondoo-common
+
+description: Dhondoo Enterprise Helm Library
+
+type: library
+
+version: 1.0.0
+
+appVersion: "1.0.0"
+
+keywords:
+  - kubernetes
+  - springboot
+  - microservices
+  - gitops
+  - platform
+
+maintainers:
+  - name: Dhondoo Platform Team
+
+home: https://github.com/Amarjeetlocato/Dhondoo-To---gitops
+
+============================================================
+FILE: helm\common\values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: kubernetes
+
+timezone: UTC
+
+image:
+  repository: ""
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+configMap:
+  enabled: false
+  data: {}
+
+secret:
+  enabled: false
+  data: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts: []
+  tls: []
+
+pdb:
+  enabled: false
+  minAvailable: 1
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+============================================================
+FILE: helm\common\templates\_deployment.tpl
+============================================================
+{{- define "dhondoo.deployment" -}}
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+name: {{ include "dhondoo.fullname" . }}
+labels:
+{{- include "dhondoo.labels" . | nindent 4 }}
+
+spec:
+replicas: {{ default 1 .Values.replicaCount }}
+revisionHistoryLimit: 10
+
+strategy:
+type: RollingUpdate
+rollingUpdate:
+maxUnavailable: 0
+maxSurge: 1
+
+selector:
+matchLabels:
+{{- include "dhondoo.selectorLabels" . | nindent 6 }}
+
+template:
+metadata:
+labels:
+{{- include "dhondoo.selectorLabels" . | nindent 8 }}
+
+```
+  {{- with .Values.podAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+spec:
+
+  {{- if .Values.securityContext }}
+  securityContext:
+    fsGroup: {{ default 1000 .Values.securityContext.fsGroup }}
+  {{- end }}
+
+  serviceAccountName: {{ include "dhondoo.serviceAccountName" . }}
+
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  containers:
+    - name: {{ include "dhondoo.name" . }}
+
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+
+      {{- if .Values.securityContext }}
+      securityContext:
+        runAsUser: {{ default 1000 .Values.securityContext.runAsUser }}
+        runAsGroup: {{ default 1000 .Values.securityContext.runAsGroup }}
+        runAsNonRoot: {{ default true .Values.securityContext.runAsNonRoot }}
+        allowPrivilegeEscalation: {{ default false .Values.securityContext.allowPrivilegeEscalation }}
+        readOnlyRootFilesystem: {{ default false .Values.securityContext.readOnlyRootFilesystem }}
+        capabilities:
+          drop:
+            - ALL
+      {{- end }}
+
+      ports:
+        - name: http
+          containerPort: {{ default 8080 .Values.service.targetPort }}
+          protocol: TCP
+
+      env:
+
+        {{- if .Values.springProfile }}
+        - name: SPRING_PROFILES_ACTIVE
+          value: {{ .Values.springProfile | quote }}
+        {{- end }}
+
+        {{- if .Values.timezone }}
+        - name: TZ
+          value: {{ .Values.timezone | quote }}
+        {{- end }}
+
+      {{- if or .Values.configMap.commonName .Values.configMap.existingName .Values.secret.commonName .Values.secret.existingName }}
+      envFrom:
+
+        {{- if .Values.configMap.commonName }}
+        - configMapRef:
+            name: {{ .Values.configMap.commonName }}
+        {{- end }}
+
+        {{- if .Values.configMap.existingName }}
+        - configMapRef:
+            name: {{ .Values.configMap.existingName }}
+        {{- end }}
+
+        {{- if .Values.secret.commonName }}
+        - secretRef:
+            name: {{ .Values.secret.commonName }}
+        {{- end }}
+
+        {{- if .Values.secret.existingName }}
+        - secretRef:
+            name: {{ .Values.secret.existingName }}
+        {{- end }}
+
+      {{- end }}
+
+      {{- with .Values.resources }}
+      resources:
+        {{- toYaml . | nindent 12 }}
+      {{- end }}
+
+      # ---------------------------------------------------------
+      # STARTUP PROBE
+      # ---------------------------------------------------------
+      # Spring Cloud Gateway can take significant time during startup
+      # because it loads Eureka registry information and builds routes.
+      #
+      # The startup probe prevents liveness/readiness from killing
+      # the container while Spring Boot is still starting.
+      # ---------------------------------------------------------
+      {{- if .Values.probes.startup }}
+      startupProbe:
+        httpGet:
+          path: {{ .Values.probes.startup.path }}
+          port: {{ default 8080 .Values.service.targetPort }}
+          scheme: HTTP
+        initialDelaySeconds: {{ default 10 .Values.probes.startup.initialDelaySeconds }}
+        timeoutSeconds: {{ default 5 .Values.probes.startup.timeoutSeconds }}
+        periodSeconds: {{ default 10 .Values.probes.startup.periodSeconds }}
+        failureThreshold: {{ default 60 .Values.probes.startup.failureThreshold }}
+        successThreshold: 1
+      {{- end }}
+
+      # ---------------------------------------------------------
+      # READINESS PROBE
+      # ---------------------------------------------------------
+      # Determines whether the pod should receive traffic.
+      # A temporary slow response does NOT restart the container.
+      # ---------------------------------------------------------
+      {{- if .Values.probes.readiness }}
+      readinessProbe:
+        httpGet:
+          path: {{ .Values.probes.readiness.path }}
+          port: {{ default 8080 $.Values.service.targetPort }}
+          scheme: HTTP
+        initialDelaySeconds: {{ default 30 .Values.probes.readiness.initialDelaySeconds }}
+        timeoutSeconds: {{ default 5 .Values.probes.readiness.timeoutSeconds }}
+        periodSeconds: {{ default 10 .Values.probes.readiness.periodSeconds }}
+        failureThreshold: {{ default 6 .Values.probes.readiness.failureThreshold }}
+        successThreshold: 1
+      {{- end }}
+
+      # ---------------------------------------------------------
+      # LIVENESS PROBE
+      # ---------------------------------------------------------
+      # Only starts after startupProbe succeeds.
+      # Therefore Spring Boot startup delays cannot cause a restart.
+      # ---------------------------------------------------------
+      {{- if .Values.probes.liveness }}
+      livenessProbe:
+        httpGet:
+          path: {{ .Values.probes.liveness.path }}
+          port: {{ default 8080 $.Values.service.targetPort }}
+          scheme: HTTP
+        initialDelaySeconds: {{ default 60 .Values.probes.liveness.initialDelaySeconds }}
+        timeoutSeconds: {{ default 5 .Values.probes.liveness.timeoutSeconds }}
+        periodSeconds: {{ default 10 .Values.probes.liveness.periodSeconds }}
+        failureThreshold: {{ default 6 .Values.probes.liveness.failureThreshold }}
+        successThreshold: 1
+      {{- end }}
+
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  {{- with .Values.affinity }}
+  affinity:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  {{- with .Values.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+```
+
+{{- end -}}
+
+============================================================
+FILE: helm\common\templates\_helpers.tpl
+============================================================
+{{/*
+==============================================================================
+Dhondoo Enterprise Helm Library
+Common Helper Templates
+
+This file contains reusable helper functions shared by all application charts.
+These helpers provide consistent naming, labels, selectors, and ServiceAccount
+generation across the entire platform.
+==============================================================================
+*/}}
+
+{{/*
+------------------------------------------------------------------------------
+Chart Name
+
+Returns the chart name or nameOverride if provided.
+
+Example:
+Chart Name   : gateway
+nameOverride : api
+
+Result:
+api
+------------------------------------------------------------------------------
+*/}}
+{{- define "dhondoo.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+------------------------------------------------------------------------------
+Full Resource Name
+
+Generates a unique Kubernetes resource name.
+
+Example:
+
+Release Name : dev
+Chart Name   : gateway
+
+Result:
+dev-gateway
+------------------------------------------------------------------------------
+*/}}
+{{- define "dhondoo.fullname" -}}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name (include "dhondoo.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+------------------------------------------------------------------------------
+Chart Label
+
+Example:
+
+gateway-1.0.0
+------------------------------------------------------------------------------
+*/}}
+{{- define "dhondoo.chart" -}}
+{{- printf "%s-%s" .Chart.Name (.Chart.Version | replace "+" "_") | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+------------------------------------------------------------------------------
+Common Labels
+
+Applied to every Kubernetes resource.
+
+Reference:
+https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/
+------------------------------------------------------------------------------
+*/}}
+{{- define "dhondoo.labels" -}}
+helm.sh/chart: {{ include "dhondoo.chart" . }}
+app.kubernetes.io/name: {{ include "dhondoo.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: dhondoo
+{{- end -}}
+
+{{/*
+------------------------------------------------------------------------------
+Selector Labels
+
+These labels are used by:
+
+- Deployment
+- Service
+- HorizontalPodAutoscaler
+
+IMPORTANT:
+Never change selector labels after a resource has been created.
+------------------------------------------------------------------------------
+*/}}
+{{- define "dhondoo.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "dhondoo.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
+------------------------------------------------------------------------------
+Service Account Name
+
+If serviceAccount.create=true
+
+Use:
+- serviceAccount.name (if specified)
+- otherwise generated fullname
+
+If create=false
+
+Use Kubernetes default ServiceAccount.
+------------------------------------------------------------------------------
+*/}}
+{{- define "dhondoo.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+{{- default (include "dhondoo.fullname" .) .Values.serviceAccount.name -}}
+{{- else -}}
+default
+{{- end -}}
+{{- end -}}
+
+============================================================
+FILE: helm\common\templates\_hpa.tpl
+============================================================
+{{- define "dhondoo.hpa" -}}
+
+{{- if .Values.autoscaling.enabled }}
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+metadata:
+  name: {{ include "dhondoo.fullname" . }}
+  labels:
+    {{- include "dhondoo.labels" . | nindent 4 }}
+
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "dhondoo.fullname" . }}
+
+  minReplicas: {{ .Values.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+
+{{- end }}
+
+{{- end -}}
+
+============================================================
+FILE: helm\common\templates\_pdb.tpl
+============================================================
+{{- define "dhondoo.pdb" -}}
+{{- if .Values.pdb.enabled }}
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+
+metadata:
+  name: {{ include "dhondoo.fullname" . }}
+  labels:
+    {{- include "dhondoo.labels" . | nindent 4 }}
+
+spec:
+  minAvailable: {{ .Values.pdb.minAvailable }}
+
+  selector:
+    matchLabels:
+      {{- include "dhondoo.selectorLabels" . | nindent 6 }}
+
+{{- end }}
+{{- end -}}
+
+============================================================
+FILE: helm\common\templates\_service.tpl
+============================================================
+{{- define "dhondoo.service" -}}
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: {{ include "dhondoo.fullname" . }}
+
+  labels:
+    {{- include "dhondoo.labels" . | nindent 4 }}
+
+spec:
+  type: {{ .Values.service.type }}
+
+  selector:
+    {{- include "dhondoo.selectorLabels" . | nindent 4 }}
+
+  ports:
+    - name: http
+
+      protocol: TCP
+
+      port: {{ .Values.service.port }}
+
+      targetPort: {{ .Values.service.targetPort }}
+
+{{- end -}}
+
+============================================================
+FILE: helm\common\templates\_serviceaccount.tpl
+============================================================
+{{- define "dhondoo.serviceaccount" -}}
+
+{{- if .Values.serviceAccount.create }}
+
+apiVersion: v1
+kind: ServiceAccount
+
+metadata:
+  name: {{ include "dhondoo.serviceAccountName" . }}
+
+  labels:
+    {{- include "dhondoo.labels" . | nindent 4 }}
+
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+{{ toYaml . | nindent 4 }}
+  {{- end }}
+
+automountServiceAccountToken: false
+
+{{- end }}
+
+{{- end -}}
+
+============================================================
+FILE: helm\gateway\values.yaml
+============================================================
+replicaCount: 1
+
+springProfile: kubernetes
+timezone: UTC
+
+image:
+  repository: whomaiamar/gateway
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8079
+  targetPort: 8079
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: "gateway"
+    SERVER_PORT: "8079"
+    SERVER_ADDRESS: "0.0.0.0"
+
+    EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+    EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+    EUREKA_CLIENT_FETCH_REGISTRY: "true"
+    EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS: "10"
+    EUREKA_CLIENT_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS: "30"
+    EUREKA_INSTANCE_HOSTNAME: "gateway"
+    EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    EUREKA_CLIENT_HEALTHCHECK_ENABLED: "true"
+
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
+
+    SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED: "true"
+    SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID: "true"
+
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_SSL_HANDSHAKE_TIMEOUT: "20000ms"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_MAX_CONNECTIONS: "100"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_MAX_IDLE_TIME: "1800s"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_PENDING_ACQUIRE_TIMEOUT: "45000ms"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_PENDING_ACQUIRE_MAX_COUNT: "-1"
+
+    SPRING_CLOUD_GATEWAY_ROUTES_0_ID: "userRegistery"
+    SPRING_CLOUD_GATEWAY_ROUTES_0_URI: "lb://USERREGISTRY"
+    SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: "Path=/api/auth/**,/api/user/**"
+
+    SPRING_CLOUD_GATEWAY_ROUTES_1_ID: "shop-service"
+    SPRING_CLOUD_GATEWAY_ROUTES_1_URI: "lb://SHOP-SERVICE"
+    SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
+
+    SPRING_CLOUD_GATEWAY_ROUTES_2_ID: "Servicechat"
+    SPRING_CLOUD_GATEWAY_ROUTES_2_URI: "lb://SERVICECHAT"
+    SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: "Path=/api/chat/**"
+
+    SPRING_CLOUD_GATEWAY_ROUTES_3_ID: "OrderService"
+    SPRING_CLOUD_GATEWAY_ROUTES_3_URI: "lb://ORDERSERVICE"
+    SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: "Path=/api/cart/**,/api/orders/**,/api/analytics/**"
+
+    SPRING_CLOUD_GATEWAY_ROUTES_4_ID: "SuperUser"
+    SPRING_CLOUD_GATEWAY_ROUTES_4_URI: "lb://SuperUser"
+    SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: "Path=/admin/**"
+
+    SPRING_CLOUD_GATEWAY_ROUTES_5_ID: "notification-service"
+    SPRING_CLOUD_GATEWAY_ROUTES_5_URI: "lb://NOTIFICATION-SERVICE"
+    SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: "Path=/api/activity-logs/**,/api/device-tokens/**,/api/notifications/**,/api/preferences/**"
+
+    LOGGING_LEVEL_ROOT: "INFO"
+    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"
+    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "DEBUG"
+
+    SPRING_PROFILES_ACTIVE: "kubernetes"
+
+secret:
+  enabled: false
+  existingName: gateway-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+ingress:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+probes:
+  startup:
+    path: /actuator/health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+============================================================
+FILE: helm\user-service\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: whomaiamar/user-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+configMap:
+  commonName: common-config
+  existingName: user-service-config
+
+secret:
+  commonName: common-secret
+  existingName: user-service-secret
+
+serviceAccount:
+  create: true
+
+resources:resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\shop-service\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: whomaiamar/shop-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8084
+  targetPort: 8084
+
+configMap:
+  commonName: common-config
+  existingName: shop-service-config
+
+secret:
+  commonName: common-secret
+  existingName: shop-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\order-service\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: whomaiamar/order-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8086
+  targetPort: 8086
+
+configMap:
+  commonName: common-config
+  existingName: order-service-config
+
+secret:
+  commonName: common-secret
+  existingName: order-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\chat-service\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: whomaiamar/chat-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8085
+  targetPort: 8085
+
+configMap:
+  commonName: common-config
+  existingName: chat-service-config
+
+secret:
+  commonName: common-secret
+  existingName: chat-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\notification-service\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: whomaiamar/notification-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8087
+  targetPort: 8087
+
+configMap:
+  commonName: common-config
+  existingName: notification-service-config
+
+secret:
+  commonName: common-secret
+  existingName: notification-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\superuser-service\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: whomaiamar/superuser-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8088
+  targetPort: 8088
+
+configMap:
+  commonName: common-config
+  existingName: superuser-service-config
+
+secret:
+  commonName: common-secret
+  existingName: superuser-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\service-registry\values.yaml
+============================================================
+replicaCount: 1
+
+springProfile: kubernetes
+
+timezone: UTC
+
+image:
+
+  repository: whomaiamar/service-registry
+
+
+  tag: "1.0.2"
+
+  pullPolicy: IfNotPresent
+
+service:
+
+  type: ClusterIP
+
+  port: 8761
+
+  targetPort: 8761
+
+configMap:
+
+  enabled: true
+
+  data:
+
+    SPRING_APPLICATION_NAME: eureka
+
+    SERVER_PORT: "8761"
+
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+
+    EUREKA_CLIENT_FETCH_REGISTRY: "false"
+
+secret:
+
+  enabled: false
+
+serviceAccount:
+
+  create: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "500m"
+    memory: 512Mi
+autoscaling:
+
+  enabled: false
+
+pdb:
+
+  enabled: false
+
+ingress:
+
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+probes:
+
+  liveness:
+
+    path: /actuator/health/liveness
+
+    initialDelaySeconds: 60
+
+    periodSeconds: 10
+
+  readiness:
+
+    path: /actuator/health/readiness
+
+    initialDelaySeconds: 30
+
+    periodSeconds: 5
+
+  startup:
+
+    path: /actuator/health
+
+    failureThreshold: 30
+
+    periodSeconds: 10
+
+
+    securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: helm\mysql\values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3306
+
+mysql:
+  rootPassword: root123
+  database: dhondoo
+  username: dhondoo
+  password: dhondoo123
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+securityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+============================================================
+FILE: infrastructure\kafka\kafka.yaml
+============================================================
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: dhondoo-kafka
+  namespace: messaging
+  annotations:
+    strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
+
+spec:
+  kafka:
+    version: 4.0.0
+    metadataVersion: 4.0-IV3
+
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+
+    authorization:
+      type: simple
+
+    config:
+      auto.create.topics.enable: false
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      num.partitions: 3
+
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+
+============================================================
+FILE: infrastructure\kafka\kafka-nodepool.yaml
+============================================================
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+
+metadata:
+  name: dhondoo-kafka-pool
+  namespace: messaging
+  labels:
+    strimzi.io/cluster: dhondoo-kafka
+
+spec:
+  replicas: 1
+
+  roles:
+    - broker
+    - controller
+
+  storage:
+    type: persistent-claim
+    size: 10Gi
+    storageClass: standard
+    deleteClaim: false
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+
+  jvmOptions:
+    "-Xms": "256m"
+    "-Xmx": "512m"
+
+  template:
+    pod:
+      metadata:
+        labels:
+          app: kafka
+
+
+============================================================
+FILE: environments\development\values\gateway-values.yaml
+============================================================
+image:
+  repository: whomaiamar/gateway
+  tag: ceb7da82d9cb8dbc5b1052e3842aad2bf525ebf0
+  pullPolicy: Always
+replicaCount: 1
+springProfile: kubernetes
+timezone: UTC
+service:
+  type: ClusterIP
+  port: 8079
+  targetPort: 8079
+configMap:
+  enabled: true
+  existingName: gateway-gateway
+  data:
+    SPRING_APPLICATION_NAME: gateway
+    SERVER_PORT: "8079"
+    SERVER_ADDRESS: "0.0.0.0"
+    FRONTEND_URL: "http://127.0.0.1:51006"
+    EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+    EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+    EUREKA_CLIENT_FETCH_REGISTRY: "true"
+    EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS: "10"
+    EUREKA_CLIENT_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS: "30"
+    EUREKA_INSTANCE_HOSTNAME: "gateway"
+    EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+    EUREKA_CLIENT_HEALTHCHECK_ENABLED: "true"
+    SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED: "true"
+    SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID: "true"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
+    SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
+secret:
+  enabled: false
+  existingName: gateway-secret
+serviceAccount:
+  create: true
+
+============================================================
+FILE: environments\development\values\user-service-values.yaml
+============================================================
+image:
+  repository: whomaiamar/user-registry
+  tag: 575c1da539c365f73a4a4d869bf40449017bf716
+  pullPolicy: Always
+replicaCount: 1
+
+============================================================
+FILE: environments\development\values\shop-service-values.yaml
+============================================================
+image:
+  repository: whomaiamar/shop-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+============================================================
+FILE: environments\development\values\order-service-values.yaml
+============================================================
+image:
+  repository: whomaiamar/order-service
+  tag: 1c85229078bdc6b3c1427e29800f714908a1f346
+  pullPolicy: Always
+replicaCount: 1
+
+============================================================
+FILE: environments\development\values\chat-service-values.yaml
+============================================================
+image:
+  repository: whomaiamar/chat-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+============================================================
+FILE: environments\development\values\notification-service-values.yaml
+============================================================
+image:
+  repository: whomaiamar/notification-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+============================================================
+FILE: environments\development\values\superuser-service-values.yaml
+============================================================
+image:
+  repository: whomaiamar/superuser-service
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+
+============================================================
+FILE: environments\development\values\service-registry-values.yaml
+============================================================
+replicaCount: 1
+
+springProfile: kubernetes
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/service-registry
+  tag: "1.0.1"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8761
+  targetPort: 8761
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: eureka
+    SERVER_PORT: "8761"
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+    EUREKA_CLIENT_FETCH_REGISTRY: "false"
+
+secret:
+  enabled: false
+
+serviceAccount:
+  create: true
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+ingress:
+  enabled: false
+
+============================================================
+FILE: environments\development\values\mysql-values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3306
+  targetPort: 3306
+
+configMap:
+  enabled: false
+
+secret:
+  enabled: true
+  data:
+    MYSQL_DATABASE: dhondoo
+    MYSQL_USER: dhondoo
+    MYSQL_PASSWORD: password123
+    MYSQL_ROOT_PASSWORD: root123
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+serviceAccount:
+  create: true
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+============================================================
+FILE: environments\production\values\gateway-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/gateway
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8079
+  targetPort: 8079
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: gateway
+    SERVER_PORT: "8079"
+
+    SPRING_PROFILES_ACTIVE: production
+
+    EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+    EUREKA_CLIENT_FETCH_REGISTRY: "true"
+
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+
+secret:
+  enabled: true
+  data:
+    JWT_SECRET: CHANGE_ME_IN_PRODUCTION
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+ingress:
+  enabled: true
+  className: nginx
+
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+  hosts:
+    - host: api.dhondoo.in
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls:
+    - secretName: gateway-tls
+      hosts:
+        - api.dhondoo.in
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+============================================================
+FILE: environments\production\values\user-service-values.yaml
+============================================================
+replicaCount: 2
+
+image:
+  repository: whomaiamar/user-service
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+springProfile: production
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+configMap:
+  commonName: common-config
+  existingName: user-service-config
+
+secret:
+  commonName: common-secret
+  existingName: user-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\shop-service-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/shop-service
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8084
+  targetPort: 8084
+
+configMap:
+  commonName: common-config
+  existingName: shop-service-config
+
+secret:
+  commonName: common-secret
+  existingName: shop-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\order-service-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/order-service
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8086
+  targetPort: 8086
+
+configMap:
+  commonName: common-config
+  existingName: order-service-config
+
+secret:
+  commonName: common-secret
+  existingName: order-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\chat-service-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/chat-service
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8085
+  targetPort: 8085
+
+configMap:
+  commonName: common-config
+  existingName: chat-service-config
+
+secret:
+  commonName: common-secret
+  existingName: chat-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\notification-service-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/notification-service
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8087
+  targetPort: 8087
+
+configMap:
+  commonName: common-config
+  existingName: notification-service-config
+
+secret:
+  commonName: common-secret
+  existingName: notification-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\superuser-service-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/superuser-service
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8088
+  targetPort: 8088
+
+configMap:
+  commonName: common-config
+  existingName: superuser-service-config
+
+secret:
+  commonName: common-secret
+  existingName: superuser-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\service-registry-values.yaml
+============================================================
+replicaCount: 2
+
+springProfile: production
+
+timezone: UTC
+
+image:
+  repository: whomaiamar/service-registry
+  tag: v1.0.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8761
+  targetPort: 8761
+
+configMap:
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: eureka
+    SERVER_PORT: "8761"
+
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+    EUREKA_CLIENT_FETCH_REGISTRY: "false"
+
+    SPRING_PROFILES_ACTIVE: production
+
+secret:
+  enabled: false
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+ingress:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}
+
+probes:
+  startup:
+    path: /actuator/health
+    failureThreshold: 30
+    periodSeconds: 10
+
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+============================================================
+FILE: environments\production\values\mysql-values.yaml
+============================================================
+replicaCount: 1
+
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3306
+  targetPort: 3306
+
+mysql:
+  rootPassword: CHANGE_ME
+  database: dhondoo
+  username: dhondoo
+  password: CHANGE_ME
+
+configMap:
+  enabled: false
+
+secret:
+  enabled: true
+
+serviceAccount:
+  create: true
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 50Gi
+
+resources:
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  limits:
+    cpu: "4"
+    memory: 4Gi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []
+
+podAnnotations: {}

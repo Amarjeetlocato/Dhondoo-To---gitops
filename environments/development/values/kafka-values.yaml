@@ -1,53 +1,67 @@
-clusterName: dhondoo-kafka
+# environments/development/values/kafka-values.yaml
 
-namespace: messaging
+replicaCount: 1
 
-version: 4.1.0
-
-replicas: 3
-
-storage:
-
-  kafka: 20Gi
-
-  controller: 10Gi
+image:
+  repository: apache/kafka
+  tag: "3.8.1"
+  pullPolicy: IfNotPresent
 
 resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: "500m"
+    memory: 1Gi
 
-  kafka:
+storage:
+  type: persistent-claim
+  size: 10Gi
+  deleteClaim: false
+  class: ""
 
-    requests:
+kafka:
+  replicas: 1
 
-      cpu: 500m
+  config:
+    defaultReplicationFactor: 1
+    minInsyncReplicas: 1
+    offsetsTopicReplicationFactor: 1
+    transactionStateLogReplicationFactor: 1
+    transactionStateLogMinIsr: 1
 
-      memory: 1Gi
+  listeners:
+    client:
+      enabled: true
+      port: 9092
 
-    limits:
+  topics:
+    autoCreate: true
 
-      cpu: "2"
+  heap:
+    min: 256m
+    max: 512m
 
-      memory: 2Gi
+jmx:
+  enabled: false
 
-  controller:
+metrics:
+  enabled: false
 
-    requests:
+podAntiAffinity:
+  enabled: false
 
-      cpu: 250m
+topologySpreadConstraints:
+  enabled: false
 
-      memory: 512Mi
+pdb:
+  enabled: false
 
-    limits:
+terminationGracePeriodSeconds: 120
 
-      cpu: "1"
+nodeSelector: {}
 
-      memory: 1Gi
+tolerations: []
 
-topics:
-
-  partitions: 3
-
-  replicas: 3
-
-retention:
-
-  days: 7
+affinity: {}
