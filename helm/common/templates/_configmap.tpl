@@ -9,7 +9,6 @@ kind: ConfigMap
 
 metadata:
   name: {{ include "dhondoo.fullname" . }}
-
   labels:
     {{- include "dhondoo.labels" . | nindent 4 }}
 

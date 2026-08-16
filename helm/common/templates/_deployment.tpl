@@ -203,7 +203,7 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
 
-          {{- if or .Values.envFrom $configMap.commonName $configMap.existingName $secret.commonName $secret.existingName }}
+                    {{- if or .Values.envFrom $configMap.enabled $configMap.commonName $configMap.existingName $secret.commonName $secret.existingName }}
 
           envFrom:
 
@@ -214,19 +214,18 @@ spec:
             {{- if $configMap.commonName }}
             - configMapRef:
                 name: {{ $configMap.commonName }}
-            {{- end }}
-
-            {{- if $configMap.existingName }}
+            {{- else if $configMap.existingName }}
             - configMapRef:
                 name: {{ $configMap.existingName }}
+            {{- else if $configMap.enabled }}
+            - configMapRef:
+                name: {{ include "dhondoo.fullname" . }}
             {{- end }}
 
             {{- if $secret.commonName }}
             - secretRef:
                 name: {{ $secret.commonName }}
-            {{- end }}
-
-            {{- if $secret.existingName }}
+            {{- else if $secret.existingName }}
             - secretRef:
                 name: {{ $secret.existingName }}
             {{- end }}
