@@ -7,7 +7,7 @@ timezone: UTC
 
 image:
   repository: whomaiamar/service-registry
-  tag: latest
+  tag: "1.0.1"
   pullPolicy: Always
 
 service:
