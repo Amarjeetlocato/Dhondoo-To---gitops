@@ -1,23 +1,15 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-
 resources:
-
-- applications/mysql.yaml
-
-- applications/service-registry.yaml
-
-- applications/kafka.yaml
-
-- applications/user-service.yaml
-
-- applications/shop-service.yaml
-
-- applications/order-service.yaml
-
-- applications/chat-service.yaml
-
-- applications/gateway.yaml
-
-- applications/monitoring.yaml
+  - applications/mysql.yaml
+  - applications/service-registry.yaml
+  - applications/kafka.yaml
+  - applications/user-service.yaml
+  - applications/shop-service.yaml
+  - applications/order-service.yaml
+  - applications/chat-service.yaml
+  - applications/gateway.yaml
+  - applications/notification-service.yaml
+  - applications/superuser-service.yaml
+  - applications/monitoring.yaml

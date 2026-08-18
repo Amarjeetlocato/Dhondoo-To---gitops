@@ -16,12 +16,15 @@ service:
   targetPort: 8761
 
 configMap:
-  commonName: common-config
-  existingName: service-registry-config
+  enabled: true
+  data:
+    SPRING_APPLICATION_NAME: "eureka"
+    SERVER_PORT: "8761"
+    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+    EUREKA_CLIENT_FETCH_REGISTRY: "false"
 
 secret:
-  commonName: common-secret
-  existingName: service-registry-secret
+  enabled: false
 
 serviceAccount:
   create: true

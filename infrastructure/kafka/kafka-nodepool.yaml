@@ -1,17 +1,12 @@
-# infrastructure/kafka/kafka-nodepool.yaml
-# PRODUCTION VERSION
-
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
-
 metadata:
   name: dhondoo-kafka-pool
   namespace: messaging
   labels:
     strimzi.io/cluster: dhondoo-kafka
-
 spec:
-  replicas: 3
+  replicas: 1
 
   roles:
     - broker
@@ -19,40 +14,23 @@ spec:
 
   storage:
     type: persistent-claim
-    size: 100Gi
-    storageClass: standard
+    size: 20Gi
     deleteClaim: false
 
   resources:
     requests:
-      cpu: "1"
-      memory: 2Gi
+      cpu: "500m"
+      memory: 512Mi
     limits:
-      cpu: "4"
-      memory: 8Gi
+      cpu: "2"
+      memory: 1Gi
 
   jvmOptions:
-    "-Xms": "1g"
-    "-Xmx": "4g"
+    "-Xms": "256m"
+    "-Xmx": "768m"
 
   template:
     pod:
       metadata:
         labels:
           app: kafka
-
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app: kafka
-              topologyKey: kubernetes.io/hostname
-
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app: kafka

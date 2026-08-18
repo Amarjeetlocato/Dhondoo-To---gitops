@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: whomaiamar/user-service
+  repository: whomaiamar/user-registry
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -21,7 +21,7 @@ secret:
 serviceAccount:
   create: true
 
-resources:resources:
+resources:
   requests:
     cpu: 100m
     memory: 256Mi
