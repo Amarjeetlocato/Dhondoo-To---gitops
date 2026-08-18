@@ -214,7 +214,8 @@ spec:
             {{- if $configMap.commonName }}
             - configMapRef:
                 name: {{ $configMap.commonName }}
-            {{- else if $configMap.existingName }}
+            {{- end }}
+            {{- if $configMap.existingName }}
             - configMapRef:
                 name: {{ $configMap.existingName }}
             {{- else if $configMap.enabled }}
