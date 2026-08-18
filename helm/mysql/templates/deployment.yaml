@@ -50,9 +50,10 @@ spec:
           startupProbe:
             tcpSocket:
               port: 3306
-            initialDelaySeconds: 20
+            initialDelaySeconds: 60
             periodSeconds: 10
             failureThreshold: 30
+            timeoutSeconds: 5
 
           readinessProbe:
             tcpSocket:
