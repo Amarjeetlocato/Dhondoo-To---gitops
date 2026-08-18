@@ -8,7 +8,7 @@ metadata:
 spec:
   topicName: notification-events
   partitions: 3
-  replicas: 3
+  replicas: 1
   config:
     cleanup.policy: delete
     retention.ms: 604800000
