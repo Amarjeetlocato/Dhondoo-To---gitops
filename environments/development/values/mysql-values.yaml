@@ -26,11 +26,12 @@ persistence:
   size: 10Gi
   storageClass: ""
 
+
 mysql:
   database: dhondoo
   username: dhondoo
-  password: ""
-  rootPassword: ""
+  password: dhondoo123
+  rootPassword: root123
 
 existingSecret: mysql-secret
 
