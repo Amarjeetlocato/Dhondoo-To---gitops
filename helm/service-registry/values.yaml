@@ -75,6 +75,7 @@ podAnnotations: {}
 probes:
 
   liveness:
+    enabled: true
 
     path: /actuator/health/liveness
 
@@ -83,6 +84,7 @@ probes:
     periodSeconds: 10
 
   readiness:
+    enabled: true
 
     path: /actuator/health/readiness
 
@@ -91,10 +93,11 @@ probes:
     periodSeconds: 5
 
   startup:
+    enabled: true
 
     path: /actuator/health
 
-    failureThreshold: 30
+    failureThreshold: 60
 
     periodSeconds: 10
 
