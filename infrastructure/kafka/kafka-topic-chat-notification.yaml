@@ -1,0 +1,15 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: chat-notification
+  namespace: messaging
+  labels:
+    strimzi.io/cluster: dhondoo-kafka
+spec:
+  topicName: chat-notification
+  partitions: 3
+  replicas: 1
+  config:
+    cleanup.policy: delete
+    retention.ms: 604800000
+    segment.bytes: 1073741824

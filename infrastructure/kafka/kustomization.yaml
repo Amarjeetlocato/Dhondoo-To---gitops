@@ -6,6 +6,8 @@ resources:
   - kafka.yaml
   - kafka-user.yaml
   - kafka-topic-chat.yaml
+  - kafka-topic-chat-notification.yaml
+  - kafka-topic-reel.yaml
   - kafka-topic-notification.yaml
   - kafka-topic-order.yaml
   - kafka-topic-product.yaml
