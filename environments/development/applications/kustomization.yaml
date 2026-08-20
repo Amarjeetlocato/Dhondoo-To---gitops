@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - chat-service.yaml
+  - gateway.yaml
+  - kafka.yaml
+  - monitoring.yaml
+  - mysql.yaml
+  - notification-service.yaml
+  - order-service.yaml
+  - service-registry.yaml
+  - shop-service.yaml
+  - superuser-service.yaml
+  - user-service.yaml

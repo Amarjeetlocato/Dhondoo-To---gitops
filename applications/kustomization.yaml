@@ -6,4 +6,3 @@ resources:
   - kafka-operator.yaml
   - kafka-cluster.yaml
   - platform.yaml
-  - security.yaml
