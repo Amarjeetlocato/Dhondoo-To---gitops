@@ -226,7 +226,8 @@ spec:
             {{- if $secret.commonName }}
             - secretRef:
                 name: {{ $secret.commonName }}
-            {{- else if $secret.existingName }}
+            {{- end }}
+            {{- if $secret.existingName }}
             - secretRef:
                 name: {{ $secret.existingName }}
             {{- end }}
