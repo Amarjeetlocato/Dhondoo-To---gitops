@@ -36,5 +36,35 @@ spec:
       num.partitions: 3
 
   entityOperator:
-    topicOperator: {}
-    userOperator: {}
+    topicOperator:
+      startupProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        timeoutSeconds: 10
+        failureThreshold: 30
+      livenessProbe:
+        initialDelaySeconds: 180
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 6
+      readinessProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        timeoutSeconds: 10
+        failureThreshold: 12
+    userOperator:
+      startupProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        timeoutSeconds: 10
+        failureThreshold: 30
+      livenessProbe:
+        initialDelaySeconds: 180
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 6
+      readinessProbe:
+        initialDelaySeconds: 60
+        periodSeconds: 10
+        timeoutSeconds: 10
+        failureThreshold: 12
