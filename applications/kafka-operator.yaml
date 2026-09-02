@@ -20,10 +20,12 @@ spec:
         livenessProbe:
           initialDelaySeconds: 60
           periodSeconds: 30
+          timeoutSeconds: 5
 
         readinessProbe:
           initialDelaySeconds: 60
           periodSeconds: 30
+          timeoutSeconds: 5
 
         resources:
           requests:
