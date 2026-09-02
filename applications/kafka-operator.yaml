@@ -17,6 +17,14 @@ spec:
       values: |
         watchAnyNamespace: true
 
+        livenessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 30
+
+        readinessProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 30
+
         resources:
           requests:
             cpu: 300m
