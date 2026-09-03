@@ -6,7 +6,6 @@ resources:
   - database.yaml
   - ingress.yaml
   - messaging.yaml
-  - monitoring.yaml
   - platform.yaml
   - security.yaml
 

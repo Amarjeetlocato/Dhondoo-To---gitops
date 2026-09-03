@@ -1,6 +1,6 @@
 # environments/development/values/superuser-service-values.yaml
 
-replicaCount: 1
+replicaCount: 0
 
 springProfile: kubernetes
 timezone: UTC
