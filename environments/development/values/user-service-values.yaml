@@ -56,7 +56,7 @@ probes:
     initialDelaySeconds: 30
     timeoutSeconds: 5
     periodSeconds: 5
-    failureThreshold: 36
+    failureThreshold: 60
     successThreshold: 1
 
   readiness:
