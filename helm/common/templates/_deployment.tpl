@@ -39,7 +39,7 @@ metadata:
     {{- include "dhondoo.labels" . | nindent 4 }}
 
 spec:
-  replicas: {{ default 1 .Values.replicaCount }}
+  replicas: {{ if hasKey .Values "replicaCount" }}{{ .Values.replicaCount }}{{ else }}1{{ end }}
   revisionHistoryLimit: {{ default 10 .Values.revisionHistoryLimit }}
   minReadySeconds: {{ default 0 .Values.minReadySeconds }}
 
