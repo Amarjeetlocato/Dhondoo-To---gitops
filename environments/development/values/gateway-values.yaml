@@ -60,7 +60,13 @@ pdb:
   enabled: false
 
 ingress:
-  enabled: false
+  enabled: true
+  className: traefik
+  hosts:
+    - host: gateway.local
+      paths:
+        - path: /
+          pathType: Prefix
 
 topologySpreadConstraints:
   enabled: false
