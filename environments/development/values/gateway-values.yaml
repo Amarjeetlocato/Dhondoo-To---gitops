@@ -1,20 +1,16 @@
 # environments/development/values/gateway-values.yaml
-
+# 
 replicaCount: 1
-
 springProfile: kubernetes
 timezone: UTC
-
 image:
   repository: whomaiamar/gateway
-  tag: ceb7da82d9cb8dbc5b1052e3842aad2bf525ebf0
+  tag: d3cdeaa8ca78e9c090ff343b52d904b83a85c071
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 8079
   targetPort: 8079
-
 configMap:
   enabled: true
   existingName: gateway-gateway
@@ -37,14 +33,11 @@ configMap:
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
     MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
-
 secret:
   enabled: false
   existingName: gateway-secret
-
 serviceAccount:
   create: true
-
 resources:
   requests:
     cpu: 100m
@@ -52,13 +45,10 @@ resources:
   limits:
     cpu: "500m"
     memory: 512Mi
-
 autoscaling:
   enabled: false
-
 pdb:
   enabled: false
-
 ingress:
   enabled: true
   className: traefik
@@ -67,13 +57,10 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-
 topologySpreadConstraints:
   enabled: false
-
 podAntiAffinity:
   enabled: false
-
 probes:
   startup:
     enabled: true
@@ -83,7 +70,6 @@ probes:
     periodSeconds: 5
     failureThreshold: 60
     successThreshold: 1
-
   readiness:
     enabled: true
     path: /actuator/health/readiness
@@ -92,7 +78,6 @@ probes:
     periodSeconds: 10
     failureThreshold: 6
     successThreshold: 1
-
   liveness:
     enabled: true
     path: /actuator/health/liveness
@@ -101,9 +86,7 @@ probes:
     periodSeconds: 20
     failureThreshold: 3
     successThreshold: 1
-
 terminationGracePeriodSeconds: 30
-
 lifecycle:
   enabled: true
   preStop:
