@@ -15,6 +15,18 @@ service:
   port: 8086
   targetPort: 8086
 
+env:
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+
+  - name: EUREKA_INSTANCE_IP_ADDRESS
+    value: "$(POD_IP)"
+
+  - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+    value: "true"
+
 configMap:
   commonName: common-config
   existingName: order-service-config

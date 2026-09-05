@@ -15,6 +15,18 @@ service:
   port: 8088
   targetPort: 8088
 
+env:
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+
+  - name: EUREKA_INSTANCE_IP_ADDRESS
+    value: "$(POD_IP)"
+
+  - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+    value: "true"
+
 configMap:
   commonName: common-config
   existingName: superuser-service-config
@@ -71,7 +83,7 @@ probes:
   liveness:
     enabled: true
     path: /actuator/health/liveness
-    initialDelaySeconds: 10
+    initialDelaySeconds: 60
     timeoutSeconds: 5
     periodSeconds: 20
     failureThreshold: 3
