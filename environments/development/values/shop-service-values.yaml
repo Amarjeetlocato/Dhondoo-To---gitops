@@ -1,43 +1,33 @@
 # environments/development/values/shop-service-values.yaml
-
+# 
 replicaCount: 1
-
 springProfile: kubernetes
 timezone: UTC
-
 image:
   repository: whomaiamar/shop-service
-  tag: latest
+  tag: ebeaef2cc87ed92409b65a94da83e10405079000
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 8084
   targetPort: 8084
-
 env:
   - name: POD_IP
     valueFrom:
       fieldRef:
         fieldPath: status.podIP
-
   - name: EUREKA_INSTANCE_IP_ADDRESS
     value: "$(POD_IP)"
-
   - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
     value: "true"
-
 configMap:
   commonName: common-config
   existingName: shop-service-config
-
 secret:
   commonName: common-secret
   existingName: shop-service-secret
-
 serviceAccount:
   create: true
-
 resources:
   requests:
     cpu: 100m
@@ -45,22 +35,16 @@ resources:
   limits:
     cpu: "500m"
     memory: 512Mi
-
 autoscaling:
   enabled: false
-
 pdb:
   enabled: false
-
 ingress:
   enabled: false
-
 topologySpreadConstraints:
   enabled: false
-
 podAntiAffinity:
   enabled: false
-
 probes:
   startup:
     enabled: true
@@ -70,7 +54,6 @@ probes:
     periodSeconds: 5
     failureThreshold: 60
     successThreshold: 1
-
   readiness:
     enabled: true
     path: /actuator/health/readiness
@@ -79,7 +62,6 @@ probes:
     periodSeconds: 10
     failureThreshold: 6
     successThreshold: 1
-
   liveness:
     enabled: true
     path: /actuator/health/liveness
@@ -88,9 +70,7 @@ probes:
     periodSeconds: 20
     failureThreshold: 3
     successThreshold: 1
-
 terminationGracePeriodSeconds: 30
-
 lifecycle:
   enabled: true
   preStop:
