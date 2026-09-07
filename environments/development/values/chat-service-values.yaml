@@ -26,6 +26,9 @@ configMap:
 secret:
   commonName: common-secret
   existingName: chat-service-secret
+envFrom:
+  - secretRef:
+      name: chat-kafka-secret
 serviceAccount:
   create: true
 resources:
