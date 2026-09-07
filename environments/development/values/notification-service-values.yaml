@@ -5,7 +5,7 @@ springProfile: kubernetes
 timezone: UTC
 image:
   repository: whomaiamar/notification-service
-  tag: 931a6827bcfeb5331648d4b68560028deebab4bf
+  tag: 32b56f0a098531c6cd5669ea57c4f60600467fe7
   pullPolicy: Always
 service:
   type: ClusterIP
