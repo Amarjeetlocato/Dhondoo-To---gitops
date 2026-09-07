@@ -1,43 +1,33 @@
 # environments/development/values/chat-service-values.yaml
-
+# 
 replicaCount: 1
-
 springProfile: kubernetes
 timezone: UTC
-
 image:
   repository: whomaiamar/chat-service
-  tag: 046b5ecc1a0b844a4e8c3a8d6d2bd0e3bf6a7cef
+  tag: 68b09ea45e86017a084a74478bc6c71bf231f389
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 8085
   targetPort: 8085
-
 env:
   - name: POD_IP
     valueFrom:
       fieldRef:
         fieldPath: status.podIP
-
   - name: EUREKA_INSTANCE_IP_ADDRESS
     value: "$(POD_IP)"
-
   - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
     value: "true"
-
 configMap:
   commonName: common-config
   existingName: chat-service-config
-
 secret:
   commonName: common-secret
   existingName: chat-service-secret
-
 serviceAccount:
   create: true
-
 resources:
   requests:
     cpu: 100m
@@ -45,22 +35,16 @@ resources:
   limits:
     cpu: "500m"
     memory: 512Mi
-
 autoscaling:
   enabled: false
-
 pdb:
   enabled: false
-
 ingress:
   enabled: false
-
 topologySpreadConstraints:
   enabled: false
-
 podAntiAffinity:
   enabled: false
-
 probes:
   startup:
     enabled: true
@@ -70,7 +54,6 @@ probes:
     periodSeconds: 5
     failureThreshold: 60
     successThreshold: 1
-
   readiness:
     enabled: true
     path: /actuator/health/readiness
@@ -79,7 +62,6 @@ probes:
     periodSeconds: 10
     failureThreshold: 6
     successThreshold: 1
-
   liveness:
     enabled: true
     path: /actuator/health/liveness
@@ -88,9 +70,7 @@ probes:
     periodSeconds: 20
     failureThreshold: 3
     successThreshold: 1
-
 terminationGracePeriodSeconds: 30
-
 lifecycle:
   enabled: true
   preStop:
