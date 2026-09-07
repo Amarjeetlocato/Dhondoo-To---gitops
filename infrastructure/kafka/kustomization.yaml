@@ -9,6 +9,7 @@ resources:
   - kafka-topic-chat-notification.yaml
   - kafka-topic-reel.yaml
   - kafka-topic-notification.yaml
+  - kafka-topic-notification-topic.yaml
   - kafka-topic-order.yaml
   - kafka-topic-product.yaml
   - kafka-topic-service.yaml
