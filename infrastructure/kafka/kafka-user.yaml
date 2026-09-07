@@ -7,20 +7,126 @@ metadata:
     strimzi.io/cluster: dhondoo-kafka
 
 spec:
-
   authentication:
     type: scram-sha-512
 
   authorization:
     type: simple
-
     acls:
+      - resource:
+          type: topic
+          name: chat-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
 
       - resource:
           type: topic
-          name: "*"
+          name: chat-notification
           patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
 
+      - resource:
+          type: topic
+          name: customer-created-topic
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: location-created-topic
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: notification-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: notification-topic
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: order-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: product-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: reel-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: service-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: shop-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: user-created
+          patternType: literal
         operations:
           - Read
           - Write
@@ -29,14 +135,12 @@ spec:
 
       - resource:
           type: group
-          name: "*"
+          name: '*'
           patternType: literal
-
         operations:
           - Read
 
       - resource:
           type: cluster
-
         operations:
           - Describe

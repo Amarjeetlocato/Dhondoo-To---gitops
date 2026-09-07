@@ -14,3 +14,6 @@ resources:
   - kafka-topic-product.yaml
   - kafka-topic-service.yaml
   - kafka-topic-shop.yaml
+  - kafka-topic-customer-created.yaml
+  - kafka-topic-user-created.yaml
+  - kafka-topic-location-created.yaml
