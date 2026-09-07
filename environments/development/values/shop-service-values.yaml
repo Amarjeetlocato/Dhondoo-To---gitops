@@ -12,6 +12,16 @@ service:
   port: 8084
   targetPort: 8084
 env:
+  - name: KAFKA_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: shop-service-kafka-secret
+        key: KAFKA_USERNAME
+  - name: KAFKA_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: shop-service-kafka-secret
+        key: KAFKA_PASSWORD
   - name: POD_IP
     valueFrom:
       fieldRef:
