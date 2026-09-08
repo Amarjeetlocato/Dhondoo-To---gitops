@@ -3,17 +3,14 @@
 replicaCount: 1
 springProfile: kubernetes
 timezone: UTC
-
 image:
   repository: whomaiamar/gateway
-  tag: d3cdeaa8ca78e9c090ff343b52d904b83a85c071
+  tag: 3931354fbefa261136f39c4f32731ad3ed05d084
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 8079
   targetPort: 8079
-
 configMap:
   enabled: true
   existingName: gateway-gateway
@@ -21,9 +18,7 @@ configMap:
     SPRING_APPLICATION_NAME: gateway
     SERVER_PORT: "8079"
     SERVER_ADDRESS: "0.0.0.0"
-
     FRONTEND_URL: "http://localhost:51006,http://127.0.0.1:51006,https://locato-web.pages.dev,https://*.locato-web.pages.dev"
-
     EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
@@ -38,14 +33,11 @@ configMap:
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
     SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
     MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
-
 secret:
   enabled: false
   existingName: gateway-secret
-
 serviceAccount:
   create: true
-
 resources:
   requests:
     cpu: 100m
@@ -53,13 +45,10 @@ resources:
   limits:
     cpu: "500m"
     memory: 512Mi
-
 autoscaling:
   enabled: false
-
 pdb:
   enabled: false
-
 ingress:
   enabled: true
   className: traefik
@@ -68,13 +57,10 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-
 topologySpreadConstraints:
   enabled: false
-
 podAntiAffinity:
   enabled: false
-
 probes:
   startup:
     enabled: true
@@ -84,7 +70,6 @@ probes:
     periodSeconds: 5
     failureThreshold: 60
     successThreshold: 1
-
   readiness:
     enabled: true
     path: /actuator/health/readiness
@@ -93,7 +78,6 @@ probes:
     periodSeconds: 10
     failureThreshold: 6
     successThreshold: 1
-
   liveness:
     enabled: true
     path: /actuator/health/liveness
@@ -102,9 +86,7 @@ probes:
     periodSeconds: 20
     failureThreshold: 3
     successThreshold: 1
-
 terminationGracePeriodSeconds: 30
-
 lifecycle:
   enabled: true
   preStop:
