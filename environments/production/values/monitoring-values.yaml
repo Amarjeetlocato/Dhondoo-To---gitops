@@ -23,7 +23,7 @@ kube-prometheus-stack:
 
     prometheusSpec:
 
-      replicas: 2
+      replicas: 1
 
       retention: 30d
 
@@ -73,7 +73,7 @@ kube-prometheus-stack:
 
     alertmanagerSpec:
 
-      replicas: 2
+      replicas: 1
 
       resources:
 
@@ -91,7 +91,7 @@ kube-prometheus-stack:
 
     enabled: true
 
-    replicas: 2
+    replicas: 1
 
     resources:
 
