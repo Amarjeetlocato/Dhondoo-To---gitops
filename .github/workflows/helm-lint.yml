@@ -45,7 +45,7 @@ jobs:
       - name: Build Chart Dependencies
         run: |
           if [ -f "helm/${{ matrix.chart }}/Chart.yaml" ]; then
-            helm dependency build helm/${{ matrix.chart }} || true
+            helm dependency build helm/${{ matrix.chart }}
           fi
 
       - name: Lint Chart
