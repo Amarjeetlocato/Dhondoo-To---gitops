@@ -5,7 +5,7 @@ springProfile: kubernetes
 timezone: UTC
 image:
   repository: whomaiamar/gateway
-  tag: c1a887081c37ae4cddaac18b861b556eca439e58
+  tag: 9547c57f531a2faa2b221a78b5b6fcb81b5c9766
   pullPolicy: Always
 service:
   type: ClusterIP
