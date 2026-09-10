@@ -10,7 +10,7 @@ resources:
   - prometheus-rbac.yaml
   - prometheus.yaml
   - prometheus-service.yaml
-  - alertmanager.yaml
+  - alertmanager-gmail-config.yaml
   - grafana.yaml
   - grafana-service.yaml
   - service-monitor.yaml

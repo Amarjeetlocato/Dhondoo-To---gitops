@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: dhondoo-gmail-alerts
+  namespace: monitoring
+spec:
+  route:
+    receiver: gmail
+    groupBy:
+      - alertname
+      - namespace
+      - pod
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+  receivers:
+    - name: gmail
+      emailConfigs:
+        - to: whoami.amar@gmail.com
+          from: whoami.amar@gmail.com
+          authUsername: whoami.amar@gmail.com
+          smarthost: smtp.gmail.com:587
+          requireTLS: true
+          sendResolved: true
+          authPassword:
+            name: alertmanager-gmail-secret
+            key: alertmanager-gmail-app-password
