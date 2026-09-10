@@ -37,6 +37,7 @@ jobs:
           for chart in helm/*; do
             if [[ -f "$chart/Chart.yaml" && "$chart" != "helm/common" && "$chart" != "helm/mysql" ]]; then
               echo "========================================"
+              helm dependency build "$chart"
               echo "Linting: $chart"
               echo "========================================"
               helm lint "$chart"
