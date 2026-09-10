@@ -7,3 +7,4 @@ resources:
   - kafka-cluster.yaml
   - platform.yaml
   - monitoring.yaml
+  - sealed-secrets.yaml
