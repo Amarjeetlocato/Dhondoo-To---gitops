@@ -61,8 +61,8 @@ kube-prometheus-stack:
           app.kubernetes.io/part-of: dhondoo
 
       serviceMonitorNamespaceSelector:
-        matchNames:
-          - monitoring
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
 
       ruleSelectorNilUsesHelmValues: false
 
@@ -71,8 +71,8 @@ kube-prometheus-stack:
           app.kubernetes.io/part-of: dhondoo
 
       ruleNamespaceSelector:
-        matchNames:
-          - monitoring
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
 
       resources:
 

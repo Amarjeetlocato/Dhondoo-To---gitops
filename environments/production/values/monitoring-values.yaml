@@ -40,8 +40,8 @@ kube-prometheus-stack:
 
       serviceMonitorNamespaceSelector:
 
-        matchNames:
-          - monitoring
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
 
       ruleSelectorNilUsesHelmValues: false
 
@@ -52,8 +52,8 @@ kube-prometheus-stack:
 
       ruleNamespaceSelector:
 
-        matchNames:
-          - monitoring
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
 
       podAntiAffinity: soft
 
