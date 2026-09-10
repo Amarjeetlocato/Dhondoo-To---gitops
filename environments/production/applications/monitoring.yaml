@@ -64,7 +64,6 @@ spec:
 
       - CreateNamespace=true
 
-      - PruneLast=true
 
       - ServerSideApply=true
 
