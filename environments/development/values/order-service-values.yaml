@@ -6,7 +6,7 @@ timezone: UTC
 
 image:
   repository: whomaiamar/order-service
-  tag: c2796938af77b7b113babfbf841e043c8dad277e
+  tag: 9547c57f531a2faa2b221a78b5b6fcb81b5c9766
   pullPolicy: Always
 
 service:
