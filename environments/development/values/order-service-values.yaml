@@ -3,52 +3,41 @@
 replicaCount: 1
 springProfile: kubernetes
 timezone: UTC
-
 image:
   repository: whomaiamar/order-service
-  tag: 9547c57f531a2faa2b221a78b5b6fcb81b5c9766
+  tag: e52095ad2be01cd32bae53170104c53e68b5a3a4
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 8086
   targetPort: 8086
-
 env:
   - name: KAFKA_USERNAME
     valueFrom:
       secretKeyRef:
         name: order-service-kafka-secret
         key: KAFKA_USERNAME
-
   - name: KAFKA_PASSWORD
     valueFrom:
       secretKeyRef:
         name: order-service-kafka-secret
         key: KAFKA_PASSWORD
-
   - name: POD_IP
     valueFrom:
       fieldRef:
         fieldPath: status.podIP
-
   - name: EUREKA_INSTANCE_IP_ADDRESS
     value: "$(POD_IP)"
-
   - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
     value: "true"
-
 configMap:
   commonName: common-config
   existingName: order-service-config
-
 secret:
   commonName: common-secret
   existingName: order-service-secret
-
 serviceAccount:
   create: true
-
 resources:
   requests:
     cpu: 100m
@@ -56,22 +45,16 @@ resources:
   limits:
     cpu: "500m"
     memory: 512Mi
-
 autoscaling:
   enabled: false
-
 pdb:
   enabled: false
-
 ingress:
   enabled: false
-
 topologySpreadConstraints:
   enabled: false
-
 podAntiAffinity:
   enabled: false
-
 probes:
   startup:
     enabled: true
@@ -81,7 +64,6 @@ probes:
     periodSeconds: 5
     failureThreshold: 60
     successThreshold: 1
-
   readiness:
     enabled: true
     path: /actuator/health/readiness
@@ -90,7 +72,6 @@ probes:
     periodSeconds: 10
     failureThreshold: 6
     successThreshold: 1
-
   liveness:
     enabled: true
     path: /actuator/health/liveness
@@ -99,9 +80,7 @@ probes:
     periodSeconds: 20
     failureThreshold: 3
     successThreshold: 1
-
 terminationGracePeriodSeconds: 30
-
 lifecycle:
   enabled: true
   preStop:
