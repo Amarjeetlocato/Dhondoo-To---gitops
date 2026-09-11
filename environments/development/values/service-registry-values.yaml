@@ -1,20 +1,16 @@
 # environments/development/values/service-registry-values.yaml
 
 replicaCount: 1
-
 springProfile: kubernetes
 timezone: UTC
-
 image:
   repository: whomaiamar/service-registry
-  tag: "1.0.2"
+  tag: "57c9214b592902413635f9a9274299dcc0588177"
   pullPolicy: Always
-
 service:
   type: ClusterIP
   port: 8761
   targetPort: 8761
-
 configMap:
   enabled: true
   data:
@@ -22,13 +18,10 @@ configMap:
     SERVER_PORT: "8761"
     EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
     EUREKA_CLIENT_FETCH_REGISTRY: "false"
-
 secret:
   enabled: false
-
 serviceAccount:
   create: true
-
 resources:
   requests:
     cpu: 100m
@@ -36,22 +29,16 @@ resources:
   limits:
     cpu: "500m"
     memory: 512Mi
-
 autoscaling:
   enabled: false
-
 pdb:
   enabled: false
-
 ingress:
   enabled: false
-
 topologySpreadConstraints:
   enabled: false
-
 podAntiAffinity:
   enabled: false
-
 probes:
   startup:
     enabled: true
@@ -61,7 +48,6 @@ probes:
     periodSeconds: 5
     failureThreshold: 60
     successThreshold: 1
-
   readiness:
     enabled: true
     path: /actuator/health/readiness
@@ -70,7 +56,6 @@ probes:
     periodSeconds: 10
     failureThreshold: 6
     successThreshold: 1
-
   liveness:
     enabled: true
     path: /actuator/health/liveness
@@ -79,9 +64,7 @@ probes:
     periodSeconds: 20
     failureThreshold: 3
     successThreshold: 1
-
 terminationGracePeriodSeconds: 30
-
 lifecycle:
   enabled: true
   preStop:
