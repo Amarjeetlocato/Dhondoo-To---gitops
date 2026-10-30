@@ -1,0 +1,81 @@
+replicaCount: 2
+
+springProfile: staging
+timezone: UTC
+
+image:
+  repository: whomaiamar/business-operation-service
+  tag: staging
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8090
+  targetPort: 8090
+
+configMap:
+  enabled: true
+  commonName: common-config
+  existingName: business-operation-service-config
+
+secret:
+  enabled: true
+  commonName: common-secret
+  existingName: business-operation-service-secret
+
+serviceAccount:
+  create: true
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+probes:
+  startup:
+    enabled: true
+    path: /actuator/health
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 5
+    failureThreshold: 36
+    successThreshold: 1
+
+  readiness:
+    enabled: true
+    path: /actuator/health/readiness
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 6
+    successThreshold: 1
+
+  liveness:
+    enabled: true
+    path: /actuator/health/liveness
+    initialDelaySeconds: 10
+    timeoutSeconds: 5
+    periodSeconds: 20
+    failureThreshold: 3
+    successThreshold: 1
+
+terminationGracePeriodSeconds: 30
+
+lifecycle:
+  enabled: true
+  preStop:
+    enabled: true
+    command:
+      - /bin/sh
+      - -c
+      - sleep 5

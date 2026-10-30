@@ -79,7 +79,9 @@ jobs:
                        helm/chat-service \
                        helm/notification-service \
                        helm/service-registry \
-                       helm/superuser-service; do
+                       helm/superuser-service \
+                       helm/billing-service \
+                       helm/business-operation-service; do
 
             name="$(basename "$chart")"
 
@@ -102,7 +104,9 @@ jobs:
                        helm/chat-service \
                        helm/notification-service \
                        helm/service-registry \
-                       helm/superuser-service; do
+                       helm/superuser-service \
+                       helm/billing-service \
+                       helm/business-operation-service; do
 
             name="$(basename "$chart")"
 

@@ -8,6 +8,8 @@ resources:
   - messaging.yaml
   - platform.yaml
   - security.yaml
+  - network-policy.yaml
+  - resource-quota.yaml
 
   - configmaps
   - secrets

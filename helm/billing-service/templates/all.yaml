@@ -1,0 +1,29 @@
+{{ include "dhondoo.configmap" . }}
+
+---
+
+{{ include "dhondoo.secret" . }}
+
+---
+
+{{ include "dhondoo.serviceaccount" . }}
+
+---
+
+{{ include "dhondoo.deployment" . }}
+
+---
+
+{{ include "dhondoo.service" . }}
+
+---
+
+{{ include "dhondoo.ingress" . }}
+
+---
+
+{{ include "dhondoo.hpa" . }}
+
+---
+
+{{ include "dhondoo.pdb" . }}

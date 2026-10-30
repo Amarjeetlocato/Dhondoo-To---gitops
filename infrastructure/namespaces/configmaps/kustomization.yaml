@@ -7,3 +7,5 @@ resources:
   - chat-service-config.yaml
   - notification-service-config.yaml
   - superuser-service-config.yaml
+  - billing-service-config.yaml
+  - business-operation-service-config.yaml

@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: platform-network-policy
+  namespace: platform
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from platform, ingress controller, monitoring, argocd, database, and messaging
+    - from:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - platform
+                  - ingress
+                  - monitoring
+                  - argocd
+                  - database
+                  - messaging
+                  - kube-system
+  egress:
+    # Allow egress to internal platform, database, messaging, monitoring, argocd, ingress, and kube-system (DNS)
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - platform
+                  - database
+                  - messaging
+                  - monitoring
+                  - argocd
+                  - kube-system
+                  - ingress
+    # Allow egress to external APIs and Cloudinary
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0

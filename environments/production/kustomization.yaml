@@ -4,6 +4,8 @@ kind: Kustomization
 resources:
   - applications/mysql.yaml
   - applications/service-registry.yaml
+  - applications/billing-service.yaml
+  - applications/business-operation-service.yaml
   - applications/chat-service.yaml
   - applications/gateway.yaml
   - applications/notification-service.yaml

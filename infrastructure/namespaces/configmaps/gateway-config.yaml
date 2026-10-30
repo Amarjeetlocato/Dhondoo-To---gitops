@@ -41,3 +41,11 @@ data:
   SPRING_CLOUD_GATEWAY_ROUTES_5_ID: notification-service
   SPRING_CLOUD_GATEWAY_ROUTES_5_URI: "lb://NOTIFICATION-SERVICE"
   SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: "Path=/api/activity-logs/**,/api/device-tokens/**,/api/notifications/**,/api/preferences/**"
+
+  SPRING_CLOUD_GATEWAY_ROUTES_6_ID: billing-service
+  SPRING_CLOUD_GATEWAY_ROUTES_6_URI: "lb://BILLINGSERVICE"
+  SPRING_CLOUD_GATEWAY_ROUTES_6_PREDICATES_0: "Path=/api/billing/**,/api/invoices/**,/api/payments/**"
+
+  SPRING_CLOUD_GATEWAY_ROUTES_7_ID: business-operation-service
+  SPRING_CLOUD_GATEWAY_ROUTES_7_URI: "lb://BUSINESSOPERATIONSERVICE"
+  SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0: "Path=/api/business/**,/api/operations/**"
