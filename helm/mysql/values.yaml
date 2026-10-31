@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: mysql
-  tag: "8.0"
+  tag: "8.0-debian"
   pullPolicy: IfNotPresent
 
 service:
