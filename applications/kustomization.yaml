@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - infrastructure.yaml
   - kafka-operator.yaml
-  - kafka-cluster.yaml
   - platform.yaml
   - monitoring.yaml
   - sealed-secrets.yaml

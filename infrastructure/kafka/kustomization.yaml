@@ -17,3 +17,12 @@ resources:
   - kafka-topic-customer-created.yaml
   - kafka-topic-user-created.yaml
   - kafka-topic-location-created.yaml
+  - kafka-topic-user.yaml
+  - kafka-topic-customer.yaml
+  - kafka-topic-location.yaml
+  - kafka-topic-business.yaml
+  - kafka-topic-billing.yaml
+  - kafka-topic-payment.yaml
+  - kafka-topic-business-operation.yaml
+  - kafka-topic-device-token.yaml
+  - kafka-topic-follow.yaml
