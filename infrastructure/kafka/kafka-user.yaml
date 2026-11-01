@@ -134,6 +134,96 @@ spec:
           - Create
 
       - resource:
+          type: topic
+          name: user-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: customer-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: location-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: business-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: billing-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: payment-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: business-operation-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: device-token-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
+          type: topic
+          name: follow-events
+          patternType: literal
+        operations:
+          - Read
+          - Write
+          - Describe
+          - Create
+
+      - resource:
           type: group
           name: '*'
           patternType: literal

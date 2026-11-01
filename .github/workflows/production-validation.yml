@@ -24,6 +24,13 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
+      - name: Add Prometheus Helm Repository
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts --force-update
+          helm repo update prometheus-community
+          helm repo add bitnami https://bitnami.github.io/sealed-secrets --force-update
+          helm repo update bitnami
+
       - name: Build common dependency
         working-directory: helm/common
         run: |
@@ -55,6 +62,13 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
+
+      - name: Add Prometheus Helm Repository
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts --force-update
+          helm repo update prometheus-community
+          helm repo add bitnami https://bitnami.github.io/sealed-secrets --force-update
+          helm repo update bitnami
 
       - name: Build dependencies
         shell: bash

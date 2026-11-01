@@ -11,6 +11,12 @@
 {{- $rollingUpdate := $strategy.rollingUpdate | default dict -}}
 
 {{- $podAntiAffinity := .Values.podAntiAffinity | default dict -}}
+{{- $affinity := .Values.affinity | default dict -}}
+{{- $affinityPodAntiAffinity := $affinity.podAntiAffinity | default dict -}}
+{{- $affinityToRender := $affinity -}}
+{{- if and $podAntiAffinity.enabled (not $affinityPodAntiAffinity) -}}
+{{- $affinityToRender = omit $affinity "podAntiAffinity" -}}
+{{- end -}}
 {{- $topologySpreadConstraints := .Values.topologySpreadConstraints | default dict -}}
 
 {{- $containerSecurityContext := .Values.containerSecurityContext | default dict -}}
@@ -106,11 +112,11 @@ spec:
 
       affinity:
 
-        {{- with .Values.affinity }}
+        {{- with $affinityToRender }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
 
-        {{- if and $podAntiAffinity.enabled (not .Values.affinity.podAntiAffinity) }}
+        {{- if and $podAntiAffinity.enabled (not $affinityPodAntiAffinity) }}
 
         podAntiAffinity:
 

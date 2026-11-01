@@ -1,33 +1,27 @@
 replicaCount: 1
-
 image:
   repository: mysql
-  tag: "8.0-debian"
+  tag: 8.0-debian
   pullPolicy: IfNotPresent
-
 service:
   type: ClusterIP
   port: 3306
-
 mysql:
   rootPassword: root123
   database: dhondoo
   username: dhondoo
   password: dhondoo123
-
 persistence:
   enabled: true
   accessMode: ReadWriteOnce
   size: 10Gi
-
 resources:
   requests:
     cpu: 250m
     memory: 512Mi
   limits:
-    cpu: "1"
+    cpu: '1'
     memory: 1Gi
-
 securityContext:
   runAsUser: 999
   runAsGroup: 999
