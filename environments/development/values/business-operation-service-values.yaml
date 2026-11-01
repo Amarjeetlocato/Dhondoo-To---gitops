@@ -4,6 +4,16 @@ timezone: UTC
 env:
   - name: DB_URL
     value: "jdbc:mysql://mysql.database.svc.cluster.local:3306/business_operation_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true"
+  - name: KAFKA_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: business-operation-service-secret
+        key: KAFKA_USERNAME
+  - name: KAFKA_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: business-operation-service-secret
+        key: KAFKA_PASSWORD
 image:
   repository: whomaiamar/business-operation-service
   tag: 759fc8cc1efe307bb4e8e8402d8f70d9460ced9f
