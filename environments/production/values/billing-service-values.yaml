@@ -1,11 +1,17 @@
-replicaCount: 3
+replicaCount: 1
 
 springProfile: production
 timezone: UTC
 
+affinity:
+  podAntiAffinity: {}
+env:
+  - name: DB_URL
+    value: "jdbc:mysql://mysql.database.svc.cluster.local:3306/dhondoo_billing?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true"
+
 image:
   repository: whomaiamar/billing-service
-  tag: v1.0.0
+  tag: 759fc8cc1efe307bb4e8e8402d8f70d9460ced9f
   pullPolicy: IfNotPresent
 
 service:
@@ -26,14 +32,14 @@ serviceAccount:
 
 resources:
   requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
     cpu: 500m
     memory: 1Gi
-  limits:
-    cpu: "2"
-    memory: 2Gi
 
 autoscaling:
-  enabled: true
+  enabled: false
   minReplicas: 3
   maxReplicas: 10
   targetCPUUtilizationPercentage: 70
@@ -61,7 +67,7 @@ autoscaling:
           periodSeconds: 60
 
 pdb:
-  enabled: true
+  enabled: false
   minAvailable: 2
 
 topologySpreadConstraints:
