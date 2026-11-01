@@ -14,6 +14,12 @@ env:
       secretKeyRef:
         name: billing-service-secret
         key: KAFKA_PASSWORD
+  - name: SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL
+    value: SASL_PLAINTEXT
+  - name: SPRING_KAFKA_PROPERTIES_SASL_MECHANISM
+    value: SCRAM-SHA-512
+  - name: SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG
+    value: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="$(KAFKA_USERNAME)" password="$(KAFKA_PASSWORD)";'
 image:
   repository: whomaiamar/billing-service
   tag: 759fc8cc1efe307bb4e8e8402d8f70d9460ced9f
