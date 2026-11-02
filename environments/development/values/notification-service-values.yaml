@@ -20,6 +20,14 @@ env:
     value: "$(POD_IP)"
   - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
     value: "true"
+  - name: EUREKA_SERVER
+    value: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+  - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+    value: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
+  - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+    value: "true"
+  - name: EUREKA_CLIENT_FETCH_REGISTRY
+    value: "true"
   - name: KAFKA_USERNAME
     valueFrom:
       secretKeyRef:
