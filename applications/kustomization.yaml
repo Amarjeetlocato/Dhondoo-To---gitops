@@ -7,3 +7,4 @@ resources:
   - platform.yaml
   - monitoring.yaml
   - sealed-secrets.yaml
+  - cert-manager.yaml
