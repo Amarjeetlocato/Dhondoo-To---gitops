@@ -1,6 +1,8 @@
 # environments/development/values/user-service-values.yaml
 #
 replicaCount: 1
+podAnnotations:
+  rollout-trigger: "jwt-secret-refresh-2026-11-03"
 springProfile: kubernetes
 timezone: UTC
 image:
