@@ -1,11 +1,11 @@
 # environments/development/values/shop-service-values.yaml
-# 
+#
 replicaCount: 1
 springProfile: kubernetes
 timezone: UTC
 image:
   repository: whomaiamar/shop-service
-  tag: 759fc8cc1efe307bb4e8e8402d8f70d9460ced9f
+  tag: 181cf99fae8601e8f854fcf8c820acee0be2d32b
   pullPolicy: Always
 service:
   type: ClusterIP
@@ -22,6 +22,14 @@ env:
       secretKeyRef:
         name: shop-service-kafka-secret
         key: KAFKA_PASSWORD
+  - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+    value: "dhondoo-kafka-kafka-bootstrap.messaging.svc.cluster.local:9092"
+  - name: SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL
+    value: SASL_PLAINTEXT
+  - name: SPRING_KAFKA_PROPERTIES_SASL_MECHANISM
+    value: SCRAM-SHA-512
+  - name: SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG
+    value: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="$(KAFKA_USERNAME)" password="$(KAFKA_PASSWORD)";'
   - name: POD_IP
     valueFrom:
       fieldRef:

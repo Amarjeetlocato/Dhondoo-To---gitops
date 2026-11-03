@@ -22,7 +22,7 @@ env:
     value: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="$(KAFKA_USERNAME)" password="$(KAFKA_PASSWORD)";'
 image:
   repository: whomaiamar/billing-service
-  tag: 5b5a51bbf3853b9e6881b55a05e0e83f722635e0
+  tag: 21eb1a3bf4eeddf2e7cbdc876ea3e95bc4731d7e
   pullPolicy: Always
 service:
   type: ClusterIP

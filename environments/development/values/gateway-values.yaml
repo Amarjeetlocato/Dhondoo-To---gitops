@@ -18,7 +18,7 @@ configMap:
     SPRING_APPLICATION_NAME: gateway
     SERVER_PORT: "8079"
     SERVER_ADDRESS: "0.0.0.0"
-    FRONTEND_URL: "http://localhost:51006,http://127.0.0.1:51006,https://locato-web.pages.dev,https://*.locato-web.pages.dev"
+    FRONTEND_URL: "https://dhondooto.com,https://www.dhondooto.com"
     EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
     EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
@@ -52,11 +52,17 @@ pdb:
 ingress:
   enabled: true
   className: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: gateway.local
+    - host: api.dhondooto.com
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - secretName: api-dhondooto-tls
+      hosts:
+        - api.dhondooto.com
 topologySpreadConstraints:
   enabled: false
 podAntiAffinity:
