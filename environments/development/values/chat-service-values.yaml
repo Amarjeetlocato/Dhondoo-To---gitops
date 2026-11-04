@@ -5,7 +5,7 @@ springProfile: kubernetes
 timezone: UTC
 image:
   repository: whomaiamar/chat-service
-  tag: 759fc8cc1efe307bb4e8e8402d8f70d9460ced9f
+  tag: 1c1403db40bdc49be632a402f7b68662087383fe
   pullPolicy: Always
 service:
   type: ClusterIP
