@@ -261,6 +261,7 @@ spec:
           labels:
             severity: warning
             team: dhondoo
+            namespace: monitoring
 
           annotations:
             summary: VPS CPU usage is high
@@ -294,6 +295,7 @@ spec:
           labels:
             severity: warning
             team: dhondoo
+            namespace: monitoring
 
           annotations:
             summary: VPS root disk space is low
@@ -319,6 +321,7 @@ spec:
           labels:
             severity: warning
             team: dhondoo
+            namespace: monitoring
 
           annotations:
             summary: VPS swap usage is high
@@ -334,6 +337,7 @@ spec:
           labels:
             severity: critical
             team: dhondoo
+            namespace: monitoring
 
           annotations:
             summary: Node Exporter is down
@@ -349,6 +353,7 @@ spec:
           labels:
             severity: critical
             team: dhondoo
+            namespace: monitoring
 
           annotations:
             summary: Node Exporter target is missing
