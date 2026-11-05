@@ -70,7 +70,7 @@ kube-prometheus-stack:
     enabled: true
 
   nodeExporter:
-    enabled: false
+    enabled: true
     resources:
       requests:
         cpu: 100m
