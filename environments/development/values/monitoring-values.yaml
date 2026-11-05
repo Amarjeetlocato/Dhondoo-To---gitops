@@ -77,12 +77,5 @@ kube-prometheus-stack:
       additionalLabels:
         app.kubernetes.io/part-of: dhondoo
 
-  prometheus-node-exporter:
+  nodeExporter:
     enabled: false
-    resources:
-      requests:
-        cpu: 25m
-        memory: 32Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
