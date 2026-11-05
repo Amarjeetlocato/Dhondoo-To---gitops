@@ -234,3 +234,122 @@ spec:
             description: >
               JVM heap usage has exceeded 85 percent
               for ten minutes.
+    # ========================================================
+    # HOST / VPS HEALTH
+    # ========================================================
+
+    - name: dhondoo.host
+
+      rules:
+
+        - alert: DhondooHostHighCPU
+
+          expr: |
+            (
+              100 * (
+                1 - avg by (instance) (
+                  rate(node_cpu_seconds_total{
+                    job="node-exporter",
+                    mode="idle"
+                  }[5m])
+                )
+              )
+            ) > 85
+
+          for: 10m
+
+          labels:
+            severity: warning
+            team: dhondoo
+
+          annotations:
+            summary: VPS CPU usage is high
+            description: Host CPU usage has exceeded 85 percent for ten minutes.
+
+        - alert: DhondooRootDiskLowSpace
+
+          expr: |
+            (
+              node_filesystem_avail_bytes{
+                job="node-exporter",
+                mountpoint="/",
+                fstype="ext4"
+              }
+              /
+              node_filesystem_size_bytes{
+                job="node-exporter",
+                mountpoint="/",
+                fstype="ext4"
+              }
+            ) * 100 < 15
+            and
+            node_filesystem_readonly{
+              job="node-exporter",
+              mountpoint="/",
+              fstype="ext4"
+            } == 0
+
+          for: 5m
+
+          labels:
+            severity: warning
+            team: dhondoo
+
+          annotations:
+            summary: VPS root disk space is low
+            description: Less than 15 percent free space remains on the root filesystem.
+
+        - alert: DhondooSwapHighUsage
+
+          expr: |
+            (
+              (
+                node_memory_SwapTotal_bytes{job="node-exporter"}
+                -
+                node_memory_SwapFree_bytes{job="node-exporter"}
+              )
+              /
+              node_memory_SwapTotal_bytes{job="node-exporter"}
+            ) * 100 > 50
+            and
+            node_memory_SwapTotal_bytes{job="node-exporter"} > 0
+
+          for: 5m
+
+          labels:
+            severity: warning
+            team: dhondoo
+
+          annotations:
+            summary: VPS swap usage is high
+            description: More than 50 percent of available swap has been used for five minutes.
+
+        - alert: DhondooNodeExporterDown
+
+          expr: |
+            up{job="node-exporter"} == 0
+
+          for: 3m
+
+          labels:
+            severity: critical
+            team: dhondoo
+
+          annotations:
+            summary: Node Exporter is down
+            description: Prometheus cannot scrape the VPS Node Exporter for three minutes.
+
+        - alert: DhondooNodeExporterMissing
+
+          expr: |
+            absent(up{job="node-exporter"})
+
+          for: 3m
+
+          labels:
+            severity: critical
+            team: dhondoo
+
+          annotations:
+            summary: Node Exporter target is missing
+            description: The Node Exporter target is missing from Prometheus service discovery.
