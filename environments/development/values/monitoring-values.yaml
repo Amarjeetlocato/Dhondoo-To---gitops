@@ -77,7 +77,7 @@ kube-prometheus-stack:
       additionalLabels:
         app.kubernetes.io/part-of: dhondoo
 
-  nodeExporter:
+  prometheus-node-exporter:
     enabled: false
     resources:
       requests:
