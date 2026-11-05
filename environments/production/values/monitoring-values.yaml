@@ -78,3 +78,9 @@ kube-prometheus-stack:
       limits:
         cpu: 500m
         memory: 512Mi
+
+  prometheus-node-exporter:
+    prometheus:
+      monitor:
+        additionalLabels:
+          app.kubernetes.io/part-of: dhondoo
