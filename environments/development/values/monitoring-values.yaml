@@ -99,6 +99,17 @@ kube-prometheus-stack:
 
     enabled: true
 
+  kube-state-metrics:
+    prometheus:
+      monitor:
+        additionalLabels:
+          app.kubernetes.io/part-of: dhondoo
+
+  kubelet:
+    serviceMonitor:
+      additionalLabels:
+        app.kubernetes.io/part-of: dhondoo
+
   nodeExporter:
 
     enabled: true
