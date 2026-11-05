@@ -78,7 +78,7 @@ kube-prometheus-stack:
         app.kubernetes.io/part-of: dhondoo
 
   nodeExporter:
-    enabled: true
+    enabled: false
     resources:
       requests:
         cpu: 25m
