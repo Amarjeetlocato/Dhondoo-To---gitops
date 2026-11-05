@@ -6,13 +6,15 @@ metadata:
 
   name: dhondoo-platform-alerts
 
-  namespace: monitoring
+  namespace: {{ .Release.Namespace }}
 
   labels:
 
     app.kubernetes.io/name: dhondoo-platform-alerts
 
     app.kubernetes.io/part-of: dhondoo
+
+    release: {{ .Release.Name }}
 
 spec:
 

@@ -4,63 +4,36 @@ kube-prometheus-stack:
     enabled: true
 
   prometheusOperator:
-
     enabled: true
-
     resources:
-
       requests:
         cpu: 50m
         memory: 64Mi
-
       limits:
         cpu: 250m
         memory: 256Mi
 
   prometheus:
-
     enabled: true
-
     prometheusSpec:
-
       replicas: 1
-
       retention: 2d
-
       scrapeInterval: 30s
-
       evaluationInterval: 30s
-
       serviceMonitorSelectorNilUsesHelmValues: false
-
       serviceMonitorSelector:
-
         matchLabels:
-          app.kubernetes.io/part-of: dhondoo
-
-      serviceMonitorNamespaceSelector:
-
-        matchNames:
-          - monitoring
-
+          release: monitoring-dev
+      serviceMonitorNamespaceSelector: {}
       ruleSelectorNilUsesHelmValues: false
-
       ruleSelector:
-
         matchLabels:
-          app.kubernetes.io/part-of: dhondoo
-
-      ruleNamespaceSelector:
-
-        matchNames:
-          - monitoring
-
+          release: monitoring-dev
+      ruleNamespaceSelector: {}
       resources:
-
         requests:
           cpu: 100m
           memory: 256Mi
-
         limits:
           cpu: 500m
           memory: 1Gi
@@ -80,23 +53,17 @@ kube-prometheus-stack:
           memory: 256Mi
 
   grafana:
-
     enabled: true
-
     replicas: 1
-
     resources:
-
       requests:
         cpu: 50m
         memory: 128Mi
-
       limits:
         cpu: 250m
         memory: 256Mi
 
   kubeStateMetrics:
-
     enabled: true
 
   kube-state-metrics:
@@ -111,15 +78,11 @@ kube-prometheus-stack:
         app.kubernetes.io/part-of: dhondoo
 
   nodeExporter:
-
     enabled: true
-
     resources:
-
       requests:
         cpu: 25m
         memory: 32Mi
-
       limits:
         cpu: 100m
         memory: 128Mi
