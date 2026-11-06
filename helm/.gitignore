@@ -1,5 +1,7 @@
 # Helm dependency packages
 **/charts/
+!monitoring/charts/
+!monitoring/charts/kube-prometheus-stack-88.3.0.tgz
 
 # Helm lock files (optional)
 # **/Chart.lock
