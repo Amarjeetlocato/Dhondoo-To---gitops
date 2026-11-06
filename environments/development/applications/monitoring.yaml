@@ -13,6 +13,7 @@ spec:
     path: helm/monitoring
     helm:
       releaseName: monitoring-dev
+      skipCrds: true
       valueFiles:
         - ../../environments/development/values/monitoring-values.yaml
   destination:
