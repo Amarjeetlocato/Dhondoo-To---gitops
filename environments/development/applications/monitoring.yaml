@@ -29,5 +29,6 @@ spec:
       - CreateNamespace=true
       - PruneLast=true
       - ServerSideApply=true
+      - DisableClientSideApplyMigration=true
       - ApplyOutOfSyncOnly=true
   revisionHistoryLimit: 10
