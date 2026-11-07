@@ -18,10 +18,6 @@ secret:
   commonName: common-secret
   existingName: notification-service-secret
 
-envFrom:
-  - secretRef:
-      name: notification-kafka-secret
-
 serviceAccount:
   create: true
 

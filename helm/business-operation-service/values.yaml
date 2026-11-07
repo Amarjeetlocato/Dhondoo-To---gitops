@@ -19,7 +19,7 @@ configMap:
   existingName: business-operation-service-config
 
 secret:
-  enabled: true
+  enabled: false
   commonName: common-secret
   existingName: business-operation-service-secret
 

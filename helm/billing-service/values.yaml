@@ -19,7 +19,7 @@ configMap:
   existingName: billing-service-config
 
 secret:
-  enabled: true
+  enabled: false
   commonName: common-secret
   existingName: billing-service-secret
 

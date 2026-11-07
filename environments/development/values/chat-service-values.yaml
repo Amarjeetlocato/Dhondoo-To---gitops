@@ -1,5 +1,5 @@
 # environments/development/values/chat-service-values.yaml
-# 
+#
 replicaCount: 1
 springProfile: kubernetes
 timezone: UTC
@@ -12,6 +12,22 @@ service:
   port: 8085
   targetPort: 8085
 env:
+  - name: KAFKA_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: chat-kafka-secret
+        key: KAFKA_USERNAME
+  - name: KAFKA_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: chat-kafka-secret
+        key: KAFKA_PASSWORD
+  - name: SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL
+    value: SASL_PLAINTEXT
+  - name: SPRING_KAFKA_PROPERTIES_SASL_MECHANISM
+    value: SCRAM-SHA-512
+  - name: SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG
+    value: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="$(KAFKA_USERNAME)" password="$(KAFKA_PASSWORD)";'
   - name: POD_IP
     valueFrom:
       fieldRef:
@@ -26,9 +42,6 @@ configMap:
 secret:
   commonName: common-secret
   existingName: chat-service-secret
-envFrom:
-  - secretRef:
-      name: chat-kafka-secret
 serviceAccount:
   create: true
 resources:
