@@ -17,3 +17,4 @@ data:
   EUREKA_SERVER: http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/
 
   SPRING_JPA_HIBERNATE_DDL_AUTO: update
+  MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
