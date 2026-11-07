@@ -74,16 +74,12 @@ kube-prometheus-stack:
   kubeStateMetrics:
     enabled: true
 
-  kube-state-metrics:
-    prometheus:
-      monitor:
-        additionalLabels:
-          app.kubernetes.io/part-of: dhondoo
-
-  kubelet:
-    serviceMonitor:
-      additionalLabels:
-        app.kubernetes.io/part-of: dhondoo
-
   nodeExporter:
-    enabled: false
+    enabled: true
+    resources:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
