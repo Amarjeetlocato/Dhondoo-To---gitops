@@ -19,6 +19,7 @@ metadata:
 spec:
 
   groups:
+    {{- if eq .Release.Name "monitoring-dev" }}
 
     # ========================================================
     # POD HEALTH
@@ -237,6 +238,7 @@ spec:
               JVM heap usage has exceeded 85 percent
               for ten minutes.
     # ========================================================
+    {{- else }}
     # HOST / VPS HEALTH
     # ========================================================
 
@@ -360,3 +362,4 @@ spec:
           annotations:
             summary: Node Exporter target is missing
             description: The Node Exporter target is missing from Prometheus service discovery.
+    {{- end }}
