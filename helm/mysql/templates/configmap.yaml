@@ -12,6 +12,8 @@ data:
     CREATE DATABASE IF NOT EXISTS chat;
     CREATE DATABASE IF NOT EXISTS notification;
     CREATE DATABASE IF NOT EXISTS superuser;
+    CREATE DATABASE IF NOT EXISTS billing;
+    CREATE DATABASE IF NOT EXISTS business_operation;
 
     GRANT ALL PRIVILEGES ON user.* TO 'dhondoo'@'%';
     GRANT ALL PRIVILEGES ON shop.* TO 'dhondoo'@'%';
@@ -19,5 +21,7 @@ data:
     GRANT ALL PRIVILEGES ON chat.* TO 'dhondoo'@'%';
     GRANT ALL PRIVILEGES ON notification.* TO 'dhondoo'@'%';
     GRANT ALL PRIVILEGES ON superuser.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON billing.* TO 'dhondoo'@'%';
+    GRANT ALL PRIVILEGES ON business_operation.* TO 'dhondoo'@'%';
 
     FLUSH PRIVILEGES;
