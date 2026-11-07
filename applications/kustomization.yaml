@@ -8,3 +8,4 @@ resources:
   - monitoring.yaml
   - sealed-secrets.yaml
   - cert-manager.yaml
+  - development-mysql-secret.yaml
