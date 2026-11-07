@@ -10,4 +10,4 @@ data:
 
   SERVER_PORT: "8084"
 
-  DB_URL: jdbc:mysql://mysql.database.svc.cluster.local:3306/shop
+  DB_URL: jdbc:mysql://mysql.database-dev.svc.cluster.local:3306/shop

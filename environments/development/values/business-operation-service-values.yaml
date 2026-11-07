@@ -3,7 +3,7 @@ springProfile: development
 timezone: UTC
 env:
   - name: DB_URL
-    value: "jdbc:mysql://mysql.database.svc.cluster.local:3306/business_operation_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true"
+    value: "jdbc:mysql://mysql.database-dev.svc.cluster.local:3306/business_operation?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true"
   - name: KAFKA_USERNAME
     valueFrom:
       secretKeyRef:
