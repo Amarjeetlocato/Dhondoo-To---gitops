@@ -29,15 +29,8 @@ podAnnotations: {}
 podLabels: {}
 
 podSecurityContext: {}
-  # fsGroup: 2000
 
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 service:
   type: ClusterIP
@@ -53,6 +46,23 @@ secret:
   enabled: false
   commonName: common-secret
   existingName: gateway-secret
+
+pdb:
+  enabled: false
+
+probes:
+  liveness:
+    path: /actuator/health/liveness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readiness:
+    path: /actuator/health/readiness
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  startup:
+    path: /actuator/health
+    initialDelaySeconds: 30
+    periodSeconds: 10
 
 env:
   - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
