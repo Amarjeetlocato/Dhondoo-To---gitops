@@ -103,3 +103,14 @@ lifecycle:
       - /bin/sh
       - -c
       - sleep 5
+extraVolumes:
+  - name: firebase-config-volume
+    secret:
+      secretName: notification-service-firebase-secret
+      items:
+        - key: firebase-config.json
+          path: firebase-config.json
+extraVolumeMounts:
+  - name: firebase-config-volume
+    mountPath: /app/firebase-config.json
+    subPath: firebase-config.json
