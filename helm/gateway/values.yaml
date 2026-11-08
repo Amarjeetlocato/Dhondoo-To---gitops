@@ -57,7 +57,7 @@ env:
   - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
     value: "lb://SHOP-SERVICE"
   - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
-    value: "Path=/s/**,/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
+    value: "Path=/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
 
   - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
     value: "Servicechat"
@@ -100,6 +100,15 @@ env:
     value: "lb://BUSINESSOPERATIONSERVICE"
   - name: SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0
     value: "Path=/api/business/**,/api/operations/**"
+
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_8_ID
+    value: "qr-redirect-service"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_8_URI
+    value: "lb://SHOP-SERVICE"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_8_PREDICATES_0
+    value: "Path=/s/**"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_8_FILTERS_0
+    value: "RewritePath=/s/(?<segment>.*), /api/public/businesses/${segment}"
 
 ingress:
   enabled: false

@@ -24,7 +24,7 @@ data:
 
   SPRING_CLOUD_GATEWAY_ROUTES_1_ID: shop-service
   SPRING_CLOUD_GATEWAY_ROUTES_1_URI: "lb://SHOP-SERVICE"
-  SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/s/**,/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
+  SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
 
   SPRING_CLOUD_GATEWAY_ROUTES_2_ID: Servicechat
   SPRING_CLOUD_GATEWAY_ROUTES_2_URI: "lb://SERVICECHAT"
@@ -49,3 +49,8 @@ data:
   SPRING_CLOUD_GATEWAY_ROUTES_7_ID: business-operation-service
   SPRING_CLOUD_GATEWAY_ROUTES_7_URI: "lb://BUSINESSOPERATIONSERVICE"
   SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0: "Path=/api/business/**,/api/operations/**"
+
+  SPRING_CLOUD_GATEWAY_ROUTES_8_ID: qr-redirect-service
+  SPRING_CLOUD_GATEWAY_ROUTES_8_URI: "lb://SHOP-SERVICE"
+  SPRING_CLOUD_GATEWAY_ROUTES_8_PREDICATES_0: "Path=/s/**"
+  SPRING_CLOUD_GATEWAY_ROUTES_8_FILTERS_0: "RewritePath=/s/(?<segment>.*), /api/public/businesses/$\\{segment\\}"
