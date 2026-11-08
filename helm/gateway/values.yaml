@@ -57,7 +57,7 @@ env:
   - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
     value: "lb://SHOP-SERVICE"
   - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
-    value: "Path=/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
+    value: "Path=/s/**,/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
 
   - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
     value: "Servicechat"

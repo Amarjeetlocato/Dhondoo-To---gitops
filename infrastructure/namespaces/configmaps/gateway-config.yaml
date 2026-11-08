@@ -24,7 +24,7 @@ data:
 
   SPRING_CLOUD_GATEWAY_ROUTES_1_ID: shop-service
   SPRING_CLOUD_GATEWAY_ROUTES_1_URI: "lb://SHOP-SERVICE"
-  SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
+  SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/s/**,/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
 
   SPRING_CLOUD_GATEWAY_ROUTES_2_ID: Servicechat
   SPRING_CLOUD_GATEWAY_ROUTES_2_URI: "lb://SERVICECHAT"
