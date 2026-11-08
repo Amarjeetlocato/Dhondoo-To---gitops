@@ -16,9 +16,9 @@ spec:
   receivers:
     - name: gmail
       emailConfigs:
-        - to: whoami.amar@gmail.com
-          from: whoami.amar@gmail.com
-          authUsername: whoami.amar@gmail.com
+        - to: dhondooto@gmail.com
+          from: dhondooto@gmail.com
+          authUsername: dhondooto@gmail.com
           smarthost: smtp.gmail.com:587
           requireTLS: true
           sendResolved: true
