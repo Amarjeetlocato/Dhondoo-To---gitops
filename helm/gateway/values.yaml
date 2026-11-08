@@ -44,6 +44,16 @@ service:
   port: 8079
   targetPort: 8079
 
+configMap:
+  enabled: true
+  commonName: common-config
+  existingName: gateway-config
+
+secret:
+  enabled: false
+  commonName: common-secret
+  existingName: gateway-secret
+
 env:
   - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
     value: "userRegistery"
