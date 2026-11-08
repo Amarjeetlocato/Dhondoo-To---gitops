@@ -7,12 +7,12 @@ env:
   - name: KAFKA_USERNAME
     valueFrom:
       secretKeyRef:
-        name: billing-service-secret
+        name: user-service-kafka-secret
         key: KAFKA_USERNAME
   - name: KAFKA_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: billing-service-secret
+        name: user-service-kafka-secret
         key: KAFKA_PASSWORD
   - name: SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL
     value: SASL_PLAINTEXT
