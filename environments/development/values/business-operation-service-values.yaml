@@ -35,7 +35,7 @@ configMap:
 secret:
   enabled: false
   commonName: common-secret
-  existingName: business-operation-service-secret
+  existingName: shop-service-secret
 serviceAccount:
   create: true
 resources:
