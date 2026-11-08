@@ -1,130 +1,134 @@
-replicaCount: 1
+# Default values for gateway.
+# This is a YAML-formatted file.
+# Declare variables to be passed to your templates.
 
-springProfile: kubernetes
-timezone: UTC
+replicaCount: 1
 
 image:
   repository: whomaiamar/gateway
-  tag: latest
   pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1c1403db40bdc49be632a402f7b68662087383fe"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API token.
+  automountServiceAccountToken: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
 
 service:
   type: ClusterIP
   port: 8079
   targetPort: 8079
 
-configMap:
-  enabled: true
-  data:
-    SPRING_APPLICATION_NAME: "gateway"
-    SERVER_PORT: "8079"
-    SERVER_ADDRESS: "0.0.0.0"
+env:
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
+    value: "userRegistery"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+    value: "lb://USERREGISTRY"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0
+    value: "Path=/api/auth/**,/api/user/**"
 
-    EUREKA_SERVER: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
-    EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: "http://service-registry-service-registry.platform.svc.cluster.local:8761/eureka/"
-    EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
-    EUREKA_CLIENT_FETCH_REGISTRY: "true"
-    EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS: "10"
-    EUREKA_CLIENT_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS: "30"
-    EUREKA_INSTANCE_HOSTNAME: "gateway"
-    EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-    EUREKA_CLIENT_HEALTHCHECK_ENABLED: "true"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
+    value: "shop-service"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+    value: "lb://SHOP-SERVICE"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
+    value: "Path=/api/businesses/**,/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
 
-    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
+    value: "Servicechat"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+    value: "lb://SERVICECHAT"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
+    value: "Path=/api/chat/**"
 
-    SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED: "true"
-    SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID: "true"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_3_ID
+    value: "OrderService"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_3_URI
+    value: "lb://ORDERSERVICE"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0
+    value: "Path=/api/cart/**,/api/orders/**,/api/analytics/**"
 
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_CONNECT_TIMEOUT: "10000"
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_RESPONSE_TIMEOUT: "60s"
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_SSL_HANDSHAKE_TIMEOUT: "20000ms"
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_MAX_CONNECTIONS: "100"
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_MAX_IDLE_TIME: "1800s"
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_PENDING_ACQUIRE_TIMEOUT: "45000ms"
-    SPRING_CLOUD_GATEWAY_HTTPCLIENT_POOL_PENDING_ACQUIRE_MAX_COUNT: "-1"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_4_ID
+    value: "SuperUser"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_4_URI
+    value: "lb://SuperUser"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0
+    value: "Path=/admin/**"
 
-    SPRING_CLOUD_GATEWAY_ROUTES_0_ID: "userRegistery"
-    SPRING_CLOUD_GATEWAY_ROUTES_0_URI: "lb://USERREGISTRY"
-    SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0: "Path=/api/auth/**,/api/user/**"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_5_ID
+    value: "notification-service"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_5_URI
+    value: "lb://NOTIFICATION-SERVICE"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0
+    value: "Path=/api/activity-logs/**,/api/device-tokens/**,/api/notifications/**,/api/preferences/**"
 
-    SPRING_CLOUD_GATEWAY_ROUTES_1_ID: "shop-service"
-    SPRING_CLOUD_GATEWAY_ROUTES_1_URI: "lb://SHOP-SERVICE"
-    SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0: "Path=/api/services/**,/api/customer-profiles/**,/api/locations/**,/api/nearby/**,/api/products/**,/api/reels/**,/api/shops/**,/api/mobile/**,/api/users/**,/api/reviews/**,/api/shop-follow/**,/api/public/**"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_6_ID
+    value: "billing-service"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_6_URI
+    value: "lb://BILLINGSERVICE"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_6_PREDICATES_0
+    value: "Path=/api/billing/**,/api/invoices/**,/api/payments/**"
 
-    SPRING_CLOUD_GATEWAY_ROUTES_2_ID: "Servicechat"
-    SPRING_CLOUD_GATEWAY_ROUTES_2_URI: "lb://SERVICECHAT"
-    SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0: "Path=/api/chat/**"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_7_ID
+    value: "business-operation-service"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_7_URI
+    value: "lb://BUSINESSOPERATIONSERVICE"
+  - name: SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0
+    value: "Path=/api/business/**,/api/operations/**"
 
-    SPRING_CLOUD_GATEWAY_ROUTES_3_ID: "OrderService"
-    SPRING_CLOUD_GATEWAY_ROUTES_3_URI: "lb://ORDERSERVICE"
-    SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0: "Path=/api/cart/**,/api/orders/**,/api/analytics/**"
-
-    SPRING_CLOUD_GATEWAY_ROUTES_4_ID: "SuperUser"
-    SPRING_CLOUD_GATEWAY_ROUTES_4_URI: "lb://SuperUser"
-    SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0: "Path=/admin/**"
-
-    SPRING_CLOUD_GATEWAY_ROUTES_5_ID: "notification-service"
-    SPRING_CLOUD_GATEWAY_ROUTES_5_URI: "lb://NOTIFICATION-SERVICE"
-    SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0: "Path=/api/activity-logs/**,/api/device-tokens/**,/api/notifications/**,/api/preferences/**"
-
-    LOGGING_LEVEL_ROOT: "INFO"
-    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"
-    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: "DEBUG"
-
-    SPRING_PROFILES_ACTIVE: "kubernetes"
-
-secret:
+ingress:
   enabled: false
-  existingName: gateway-secret
-
-serviceAccount:
-  create: true
 
 resources:
   requests:
     cpu: 100m
     memory: 256Mi
   limits:
-    cpu: "500m"
+    cpu: 500m
     memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
 
 autoscaling:
   enabled: false
 
-pdb:
-  enabled: false
-
-ingress:
-  enabled: false
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
-
-imagePullSecrets: []
-
-podAnnotations: {}
-
-probes:
-  startup:
-    path: /actuator/health
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 30
-
-  readiness:
-    path: /actuator/health/readiness
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 6
-
-  liveness:
-    path: /actuator/health/liveness
-    initialDelaySeconds: 60
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 6
