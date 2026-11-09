@@ -5,7 +5,7 @@ springProfile: kubernetes
 timezone: UTC
 image:
   repository: whomaiamar/shop-service
-  tag: e925a902905e5217012f685408d107fe331774d9
+  tag: 7ce9cb0ba3b3702636a2cf9138cd1d5f43c562a8
   pullPolicy: Always
 service:
   type: ClusterIP
