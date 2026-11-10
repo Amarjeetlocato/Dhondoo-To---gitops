@@ -249,9 +249,13 @@ spec:
         - alert: DhondooKafkaAuthFailed
 
           expr: |
-            increase(kube_pod_container_status_restarts_total{namespace="platform", container=~".*kafka.*"}[15m]) > 2
+            increase(kafka_producer_connection_close_total[5m]) > 5
+            or
+            increase(kafka_consumer_connection_close_total[5m]) > 5
+            or
+            increase(kube_pod_container_status_restarts_total{namespace="platform"}[15m]) > 2
 
-          for: 2m
+          for: 1m
 
           labels:
 
