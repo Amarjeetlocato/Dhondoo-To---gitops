@@ -45,9 +45,7 @@ kube-prometheus-stack:
     alertmanagerSpec:
       replicas: 1
       alertmanagerConfigSelector: {}
-      alertmanagerConfigNamespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: monitoring-dev
+      alertmanagerConfigNamespaceSelector: {}
       resources:
         requests:
           cpu: 50m

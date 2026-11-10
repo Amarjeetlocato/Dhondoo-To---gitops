@@ -10,9 +10,9 @@ spec:
       - alertname
       - namespace
       - pod
-    groupWait: 30s
-    groupInterval: 5m
-    repeatInterval: 4h
+    groupWait: 10s
+    groupInterval: 2m
+    repeatInterval: 2h
   receivers:
     - name: gmail
       emailConfigs:
