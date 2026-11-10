@@ -19,7 +19,6 @@ metadata:
 spec:
 
   groups:
-    {{- if eq .Release.Name "monitoring-dev" }}
 
     # ========================================================
     # POD HEALTH
@@ -330,7 +329,6 @@ spec:
             description: >
               MySQL database pod in database-dev namespace is unready or unreachable.
     # ========================================================
-    {{- else }}
     # HOST / VPS HEALTH
     # ========================================================
 
@@ -454,4 +452,3 @@ spec:
           annotations:
             summary: Node Exporter target is missing
             description: The Node Exporter target is missing from Prometheus service discovery.
-    {{- end }}

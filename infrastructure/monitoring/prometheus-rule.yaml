@@ -176,3 +176,71 @@ spec:
           annotations:
             summary: "Dhondoo JVM heap usage is high"
             description: "JVM heap usage has exceeded 85% for 10 minutes."
+
+    - name: dhondoo.services
+
+      rules:
+
+        - alert: DhondooKafkaAuthFailed
+
+          expr: |
+            increase(kafka_producer_connection_close_total[5m]) > 5
+            or
+            increase(kafka_consumer_connection_close_total[5m]) > 5
+            or
+            increase(kube_pod_container_status_restarts_total{namespace="platform"}[15m]) > 2
+
+          for: 1m
+
+          labels:
+            severity: critical
+            team: dhondoo
+
+          annotations:
+            summary: "Kafka SASL/SCRAM authentication failure or connection lost"
+            description: "A Dhondoo microservice failed to authenticate with Kafka brokers via SCRAM-SHA-512."
+
+        - alert: DhondooJDBCConnectionFailed
+
+          expr: |
+            increase(hikaricp_connections_timeout_total{namespace="platform"}[5m]) > 0
+
+          for: 2m
+
+          labels:
+            severity: critical
+            team: dhondoo
+
+          annotations:
+            summary: "JDBC Database Connection Failed / HikariCP Timeout"
+            description: "MySQL JDBC connection pool timeout or HikariCP connections exhausted for a microservice."
+
+        - alert: DhondooGatewayHigh5xxErrors
+
+          expr: |
+            sum(rate(spring_cloud_gateway_requests_seconds_count{status=~"5.*"}[5m])) > 1
+
+          for: 2m
+
+          labels:
+            severity: critical
+            team: dhondoo
+
+          annotations:
+            summary: "High 5xx HTTP Error Rate on API Gateway"
+            description: "API Gateway is returning 500/502/503 errors to incoming user requests."
+
+        - alert: DhondooMySQLPodFailed
+
+          expr: |
+            kube_pod_status_ready{namespace="database-dev", pod=~".*mysql.*", condition="true"} == 0
+
+          for: 2m
+
+          labels:
+            severity: critical
+            team: dhondoo
+
+          annotations:
+            summary: "MySQL Database Pod Down or Unready"
+            description: "MySQL database pod in database-dev namespace is unready or unreachable."
