@@ -44,6 +44,7 @@ kube-prometheus-stack:
     enabled: true
     alertmanagerSpec:
       replicas: 1
+      externalUrl: "https://dhondoto.com"
       alertmanagerConfigSelector: {}
       alertmanagerConfigNamespaceSelector: {}
       resources:
