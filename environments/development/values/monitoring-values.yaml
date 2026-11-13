@@ -76,11 +76,7 @@ kube-prometheus-stack:
     enabled: true
 
   nodeExporter:
-    enabled: true
-    resources:
-      requests:
-        cpu: 25m
-        memory: 32Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
+    enabled: false
+
+  prometheus-node-exporter:
+    enabled: false
