@@ -20,6 +20,11 @@ spec:
         authentication:
           type: scram-sha-512
 
+      - name: admin
+        port: 9094
+        type: internal
+        tls: false
+
       - name: tls
         port: 9093
         type: internal
@@ -27,6 +32,11 @@ spec:
 
     authorization:
       type: simple
+      superUsers:
+        - CN=dhondoo-kafka-entity-operator
+        - User:dhondoo-services
+        - "User:Whoami@Kafka"
+        - User:ANONYMOUS
 
     config:
       auto.create.topics.enable: false
