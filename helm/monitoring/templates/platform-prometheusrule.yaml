@@ -288,10 +288,10 @@ spec:
 
           annotations:
 
-            summary: "HTTP 500 Server Error in {{ $labels.app_kubernetes_io_name || $labels.job }}"
+            summary: Dhondoo microservice HTTP 500 error encountered
 
             description: >
-              Microservice {{ $labels.app_kubernetes_io_name || $labels.job }} encountered a 500 error on endpoint {{ $labels.uri }}. Exception: {{ $labels.exception }}
+              A platform microservice returned an HTTP 500 server error or unhandled exception.
 
         - alert: DhondooServiceUnhealthy
 
@@ -308,10 +308,10 @@ spec:
 
           annotations:
 
-            summary: "Microservice Unhealthy: {{ $labels.pod }}"
+            summary: Dhondoo microservice is unhealthy or failing readiness probe
 
             description: >
-              Pod {{ $labels.pod }} in platform namespace is failing readiness probes or is not ready.
+              A microservice pod in the platform namespace is failing readiness probes or is not ready.
 
         - alert: DhondooJDBCConnectionFailed
 
