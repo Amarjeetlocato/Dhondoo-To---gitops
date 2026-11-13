@@ -248,11 +248,13 @@ spec:
         - alert: DhondooKafkaAuthFailed
 
           expr: |
-            increase(kafka_producer_connection_close_total[5m]) > 5
+            increase(kafka_producer_record_error_total[5m]) > 0
             or
-            increase(kafka_consumer_connection_close_total[5m]) > 5
+            increase(spring_kafka_listener_seconds_count{exception!="none"}[5m]) > 0
             or
-            increase(kube_pod_container_status_restarts_total{namespace="platform"}[15m]) > 2
+            increase(kafka_server_socketserver_failedauthenticationtotal[5m]) > 0
+            or
+            increase(kube_pod_container_status_restarts_total{namespace="platform"}[15m]) > 0
 
           for: 1m
 
@@ -267,7 +269,49 @@ spec:
             summary: Kafka SASL/SCRAM authentication failure or connection lost
 
             description: >
-              A Dhondoo microservice failed to authenticate with Kafka brokers via SCRAM-SHA-512.
+              A Dhondoo microservice failed to authenticate with Kafka brokers via SCRAM-SHA-512 or message delivery failed.
+
+        - alert: DhondooServiceHTTP5xxError
+
+          expr: |
+            sum by (namespace, app_kubernetes_io_name, uri, exception) (
+              increase(http_server_requests_seconds_count{namespace="platform", status=~"5.."}[3m])
+            ) > 0
+
+          for: 30s
+
+          labels:
+
+            severity: critical
+
+            team: dhondoo
+
+          annotations:
+
+            summary: "HTTP 500 Server Error in {{ $labels.app_kubernetes_io_name || $labels.job }}"
+
+            description: >
+              Microservice {{ $labels.app_kubernetes_io_name || $labels.job }} encountered a 500 error on endpoint {{ $labels.uri }}. Exception: {{ $labels.exception }}
+
+        - alert: DhondooServiceUnhealthy
+
+          expr: |
+            kube_pod_status_ready{namespace="platform", condition="false"} == 1
+
+          for: 1m
+
+          labels:
+
+            severity: critical
+
+            team: dhondoo
+
+          annotations:
+
+            summary: "Microservice Unhealthy: {{ $labels.pod }}"
+
+            description: >
+              Pod {{ $labels.pod }} in platform namespace is failing readiness probes or is not ready.
 
         - alert: DhondooJDBCConnectionFailed
 

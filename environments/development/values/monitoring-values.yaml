@@ -47,6 +47,8 @@ kube-prometheus-stack:
       externalUrl: "https://dhondoto.com"
       alertmanagerConfigSelector: {}
       alertmanagerConfigNamespaceSelector: {}
+      alertmanagerConfigMatcherStrategy:
+        type: None
       resources:
         requests:
           cpu: 50m
