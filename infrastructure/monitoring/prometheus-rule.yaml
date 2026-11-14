@@ -233,7 +233,7 @@ spec:
         - alert: DhondooMySQLPodFailed
 
           expr: |
-            kube_pod_status_ready{namespace="database-dev", pod=~".*mysql.*", condition="true"} == 0
+            kube_pod_status_ready{namespace="database-dev", pod=~".*mysql.*", pod!~".*backup.*", condition="true"} == 0
 
           for: 2m
 
