@@ -129,7 +129,7 @@ spec:
             /
             (
               sum by (namespace, pod) (
-                kube_pod_container_resource_requests{
+                container_spec_memory_limit_bytes{
                   namespace="platform",
                   resource="cpu",
                   unit="core"
@@ -173,7 +173,7 @@ spec:
             /
             (
               sum by (namespace, pod) (
-                kube_pod_container_resource_requests{
+                container_spec_memory_limit_bytes{
                   namespace="platform",
                   resource="memory",
                   unit="byte"
