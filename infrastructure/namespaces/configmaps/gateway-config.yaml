@@ -48,7 +48,7 @@ data:
 
   SPRING_CLOUD_GATEWAY_ROUTES_7_ID: business-operation-service
   SPRING_CLOUD_GATEWAY_ROUTES_7_URI: "lb://BUSINESSOPERATIONSERVICE"
-  SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0: "Path=/api/business/**,/api/operations/**"
+  SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0: "Path=/api/business/**,/api/operations/**,/api/business-operations/**,/api/business-operation/**"
 
   SPRING_CLOUD_GATEWAY_ROUTES_8_ID: qr-redirect-service
   SPRING_CLOUD_GATEWAY_ROUTES_8_URI: "lb://SHOP-SERVICE"

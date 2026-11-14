@@ -119,7 +119,7 @@ env:
   - name: SPRING_CLOUD_GATEWAY_ROUTES_7_URI
     value: "lb://BUSINESSOPERATIONSERVICE"
   - name: SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0
-    value: "Path=/api/business/**,/api/operations/**"
+    value: "Path=/api/business/**,/api/operations/**,/api/business-operations/**,/api/business-operation/**"
 
   - name: SPRING_CLOUD_GATEWAY_ROUTES_8_ID
     value: "qr-redirect-service"
